@@ -49,10 +49,6 @@ repositories:
     type: git
     url: https://github.com/cmu-cabot/rviz
     version: humble-dev
-  docker/humble-custom/realsense_ros:
-    type: git
-    url: https://github.com/IntelRealSense/realsense-ros.git
-    version: 4.51.1
 
   docker/opengl:
     type: git
