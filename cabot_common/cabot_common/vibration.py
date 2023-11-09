@@ -34,3 +34,7 @@ STIMULI_COUNT = 10
 
 stimuli_names = ["unknown", "left_turn", "right_turn", "left_dev", "right_dev",
                  "front", "left_about_turn", "right_about_turn", "button_click", "button_holddown"]
+
+
+def get_name(stimulus):
+    return stimuli_names[stimulus]
