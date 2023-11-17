@@ -91,6 +91,7 @@ function build_ros_base_image {
 
     sed s=FROM.*=FROM\ $FROM_IMAGE= Dockerfile > Dockerfile.temp && \
         docker build -f Dockerfile.temp -t $IMAGE_TAG $option .
+    rm Dockerfile.temp
     if [ $? -ne 0 ]; then
         red "failed to build $IMAGE_TAG"
         exit 1
@@ -104,6 +105,7 @@ function build_ros_base_image {
     pushd $build_dir/docker_images/ros/$ROS_DISTRO/ubuntu/$UBUNTU_DISTRO/ros-base/
     sed s=FROM.*=FROM\ $FROM_IMAGE= Dockerfile > Dockerfile.temp && \
         docker build -f Dockerfile.temp -t $IMAGE_TAG $option .
+    rm Dockerfile.temp
     if [ $? -ne 0 ]; then
         red "failed to build $IMAGE_TAG"
         exit 1
@@ -120,6 +122,7 @@ function build_ros_base_image {
     pushd $build_dir/docker_images/ros/$ROS_DISTRO/ubuntu/$UBUNTU_DISTRO/desktop/
     sed s=FROM.*=FROM\ $FROM_IMAGE= Dockerfile > Dockerfile.temp && \
         docker build -f Dockerfile.temp -t $IMAGE_TAG $option .
+    rm Dockerfile.temp
     if [ $? -ne 0 ]; then
         red "failed to build $IMAGE_TAG"
         exit 1
