@@ -59,10 +59,10 @@ option="--progress=auto"
 
 while getopts "hP:" arg; do
     case $arg in
-	h)
-	    help
-	    exit
-	    ;;
+    h)
+        help
+        exit
+        ;;
     P)
         prefix=${OPTARG}
         ;;
@@ -111,7 +111,7 @@ function build_ros_base_image {
     popd
 
     if [[ $ROS_COMPONENT = "ros-base" ]]; then
-	returnn
+    returnn
     fi
 
     echo ""
@@ -138,10 +138,10 @@ function prebuild {
     pushd $IMAGE_DIR
     blue "## build $IMAGE_TAG"
     docker build -t $IMAGE_TAG \
-	   --file Dockerfile \
-	   --build-arg TZ=$time_zone \
-	   --build-arg FROM_IMAGE=$FROM_IMAGE \
-	   . && popd
+       --file Dockerfile \
+       --build-arg TZ=$time_zone \
+       --build-arg FROM_IMAGE=$FROM_IMAGE \
+       . && popd
 }
 
 function prebuild_ros2 {
@@ -154,20 +154,20 @@ function prebuild_ros2 {
     image_tag=$base_image
     build_ros_base_image $image_tag $image_tag $ROS2_UBUNTU_DISTRO $ROS2_DISTRO desktop image_tag
     if [ $? -ne 0 ]; then
-	red "failed to build $name1"
-	exit 1
+    red "failed to build $name1"
+    exit 1
     fi
 
     prebuild $image_tag $base_name $build_dir/${ROS2_DISTRO}-custom image_tag
     if [ $? -ne 0 ]; then
-	red "failed to build $image_tag"
-	return 1
+    red "failed to build $image_tag"
+    return 1
     fi
 
     prebuild $image_tag $image_tag $build_dir/mesa image_tag
     if [ $? -ne 0 ]; then
-	red "failed to build $image_tag"
-	return 1
+    red "failed to build $image_tag"
+    return 1
     fi
 }
 
