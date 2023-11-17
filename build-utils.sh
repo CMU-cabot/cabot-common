@@ -123,7 +123,7 @@ function build_workspace {
 				built[$dir]=1
 			done
 			if $flag; then
-				red "already built"
+				blue "skip -- already built"
 				continue
 			fi
 			docker compose -f $dcfile run --rm $service /launch.sh build
