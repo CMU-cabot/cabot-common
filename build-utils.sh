@@ -34,102 +34,104 @@ function blue {
 
 function show_available_services {
     local -n dcfiles_=$1
-	declare -A services_dict
+    declare -A services_dict
     for dcfile in ${dcfiles_[@]}; do
-		services=$(docker compose -f $dcfile config --services 2> /dev/null)
-		for service in ${services[@]}; do
-			if [[ ! -v services_dict[$service] ]]; then
-				echo "  $service"
-			fi
-			services_dict[$service]=1
-		done
-	done
+        services=$(docker compose -f $dcfile config --services 2> /dev/null)
+        for service in ${services[@]}; do
+            if [[ ! -v services_dict[$service] ]]; then
+                echo "  $service"
+            fi
+            services_dict[$service]=1
+        done
+    done
 }
 
 function build_image {
     local -n dcfiles_=$1
-	local -n targets_=$2
-	local -n option_=$3
-	local -n time_zone_=$4
-	local -n uid_=$5
-	local -n prefix_=$6
+    local -n targets_=$2
+    local -n option_=$3
+    local -n time_zone_=$4
+    local -n uid_=$5
+    local -n prefix_=$6
 
-	if [[ ! -z $targets_ ]]; then
-		# make target dict
-		declare -A target_dict
-		for target in ${targets_[@]}; do
-			target_dict[$target]=1
-		done
-	fi
+    if [[ ! -z $targets_ ]]; then
+        # make target dict
+        declare -A target_dict
+        for target in ${targets_[@]}; do
+            target_dict[$target]=1
+        done
+    fi
     blue "Building images"
     for dcfile in ${dcfiles_[@]}; do
-		blue "Building $dcfile"
-		services=$(docker compose -f $dcfile config --services | grep -v base)
-		if [[ $? -ne 0 ]]; then
-			continue
-		fi
-		for service in ${services[@]}; do
-			# check if target_dict exists and service is in the target_dict
-			if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
-				continue
-			fi
-			blue "Building image of $dcfile, $service"
-			docker compose -f $dcfile build \
-				--build-arg PREFIX=$prefix_ \
-				--build-arg UID=$uid_ \
-				--build-arg TZ=$time_zone_ \
-				$option_ \
-				$service
-			if [[ $? -ne 0 ]]; then
-				exit
-			fi
-		done
+        blue "Building $dcfile"
+        services=$(docker compose -f $dcfile config --services)
+        if [[ $? -ne 0 ]]; then
+            exit
+        fi
+        services=$(echo ${services[@]} | grep -v base)
+        for service in ${services[@]}; do
+            # check if target_dict exists and service is in the target_dict
+            if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
+                continue
+            fi
+            blue "Building image of $dcfile, $service"
+            docker compose -f $dcfile build \
+                --build-arg PREFIX=$prefix_ \
+                --build-arg UID=$uid_ \
+                --build-arg TZ=$time_zone_ \
+                $option_ \
+                $service
+            if [[ $? -ne 0 ]]; then
+                exit
+            fi
+        done
     done
 }
 
 function build_workspace {
     local -n dcfiles_=$1
-	local -n targets_=$2
-	if [[ ! -z $targets_ ]]; then
-		# make target dict
-		declare -A target_dict
-		for target in ${targets_[@]}; do
-			target_dict[$target]=1
-		done
-	fi
+    local -n targets_=$2
+    if [[ ! -z $targets_ ]]; then
+        # make target dict
+        declare -A target_dict
+        for target in ${targets_[@]}; do
+            target_dict[$target]=1
+        done
+    fi
     declare -A built
 
     blue "Building workspaces"
     for dcfile in ${dcfiles_[@]}; do
-		blue "Building $dcfile"
-		services=$(docker compose -f $dcfile config --services | grep -v base)
-		if [[ $? -ne 0 ]]; then
-			continue
-		fi
-		for service in ${services[@]}; do
-			# check if target_dict exists and service is in the target_dict
-			if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
-				continue
-			fi
-			blue "Building workspace of $dcfile, $service"
+        blue "Building $dcfile"
+        services=$(docker compose -f $dcfile config --services)
+        if [[ $? -ne 0 ]]; then
+            exit
+        fi
+        services=$(echo ${services[@]} | grep -v base | grep -v lint)
+        for service in ${services[@]}; do
+            # check if target_dict exists and service is in the target_dict
+            if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
+                continue
+            fi
+            blue "Building workspace of $dcfile, $service"
 
-			# check if volume src dir is already built or not
-			dirs=$(docker compose -f $dcfile config $service | grep target | grep src | cut -d: -f2)
-			flag=true
-			for dir in ${dirs[@]}; do
-				if [[ ! -v built[$dir] ]]; then
-					flag=false
-				fi
-				built[$dir]=1
-			done
-			if $flag; then
-				blue "skip -- already built"
-				continue
-			fi
-			docker compose -f $dcfile run --rm $service /launch.sh build
-			if [[ $? -ne 0 ]]; then
-			exit
-			fi
-		done
+            # check if volume src dir is already built or not
+            dirs=$(docker compose -f $dcfile config $service | grep target | grep src | cut -d: -f2)
+            flag=true
+            for dir in ${dirs[@]}; do
+                if [[ ! -v built[$dir] ]]; then
+                    flag=false
+                fi
+                built[$dir]=1
+            done
+            if $flag; then
+                blue "skip -- already built"
+                continue
+            fi
+            docker compose -f $dcfile run --rm $service /launch.sh build
+            if [[ $? -ne 0 ]]; then
+                exit
+            fi
+        done
     done
 }
