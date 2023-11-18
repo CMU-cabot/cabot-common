@@ -29,26 +29,11 @@ repositories:
     type: git
     url: https://github.com/cmu-cabot/realsense_gazebo_plugin.git
     version: humble-devel
-  docker/humble-custom/perception_pcl:
-    type: git
-    url: https://github.com/ros-perception/perception_pcl
-    version: ros2
-  docker/humble-custom/geometry2:
-    # suppress spam warning messages
-    type: git
-    url: https://github.com/cmu-cabot/geometry2
-    version: humble-dev
   docker/humble-custom/ros2_persist_parameter_server:
     # added double value workaround
     type: git
     url: https://github.com/daisukes/ros2_persist_parameter_server
     version: double-value-workaround
-  docker/humble-custom/rviz:
-    # added Map update fix
-    # https://github.com/ros2/rviz/commit/efa6b89b16ce6581d9d749da4fa70d1b17566670
-    type: git
-    url: https://github.com/cmu-cabot/rviz
-    version: humble-dev
 
   docker/opengl:
     type: git
