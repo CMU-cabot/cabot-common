@@ -41,6 +41,7 @@ function help {
     echo "Usage: $0 -p <prefix>"
     echo ""
     echo "-h                    show this help"
+    echo "-o <option>           prebuild with option"
     echo "-P <prefix>           prebuild with prefix"
 }
 
@@ -57,11 +58,14 @@ build_dir=$scriptdir/docker
 prefix=
 option="--progress=auto"
 
-while getopts "hP:" arg; do
+while getopts "ho:P:" arg; do
     case $arg in
     h)
         help
         exit
+        ;;
+    o)
+        option=$OPTARG
         ;;
     P)
         prefix=${OPTARG}
@@ -142,7 +146,6 @@ function prebuild {
     blue "## build $IMAGE_TAG"
     docker build -t $IMAGE_TAG \
        --file Dockerfile \
-       --build-arg TZ=$time_zone \
        --build-arg FROM_IMAGE=$FROM_IMAGE \
        . && popd
 }
@@ -150,7 +153,6 @@ function prebuild {
 function prebuild_ros2 {
     blue "- UBUNTU_DISTRO=$ROS2_UBUNTU_DISTRO"
     blue "- ROS2_DISTRO=$ROS2_DISTRO"
-    blue "- TIME_ZONE=$time_zone"
 
     base_image=ubuntu:$ROS2_UBUNTU_DISTRO
     base_name=${prefix}__${ROS2_UBUNTU_DISTRO}
