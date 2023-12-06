@@ -7,21 +7,29 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(cabot_msgs REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(diagnostic_updater REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(people_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-find_package(cabot_msgs REQUIRED)
-find_package(people_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
-set(dependencies
+add_executable(footprint_publisher
+  src/footprint_publisher.cpp
+)
+
+ament_target_dependencies(footprint_publisher
   rclcpp
-  people_msgs
-  visualization_msgs
-  tf2
+  geometry_msgs
+  sensor_msgs
+  diagnostic_msgs
+  diagnostic_updater
 )
 
 add_executable(people_vis_node
@@ -29,7 +37,10 @@ add_executable(people_vis_node
 )
 
 ament_target_dependencies(people_vis_node
-  ${dependencies}
+  rclcpp
+  people_msgs
+  visualization_msgs
+  tf2
 )
 
 if(BUILD_TESTING)
@@ -73,6 +84,7 @@ install(PROGRAMS
 )
 
 install(TARGETS
+  footprint_publisher
   lookup_transform_service
   people_vis_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
