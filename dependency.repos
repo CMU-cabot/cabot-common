@@ -34,6 +34,10 @@ repositories:
     type: git
     url: https://github.com/daisukes/ros2_persist_parameter_server
     version: double-value-workaround
+  docker/humble-custom/perception_pcl:
+    type: git
+    url: https://github.com/ros-perception/perception_pcl
+    version: ros2
 
   docker/opengl:
     type: git
