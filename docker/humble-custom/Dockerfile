@@ -22,6 +22,8 @@ RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mix
 
 RUN apt update && \
     apt install -y --no-install-recommends \
+    libapr1-dev \
+    libaprutil1-dev \
     libasio-dev \
     libpcap-dev \
     ros-$ROS_DISTRO-camera-info-manager \
