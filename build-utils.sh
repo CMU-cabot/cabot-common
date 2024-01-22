@@ -91,6 +91,7 @@ function build_image {
 function build_workspace {
     local -n dcfiles_=$1
     local -n targets_=$2
+    local -n debug_=$3
     if [[ ! -z $targets_ ]]; then
         # make target dict
         declare -A target_dict
@@ -113,7 +114,7 @@ function build_workspace {
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
                 continue
             fi
-            blue "Building workspace of $dcfile, $service"
+            blue "Building workspace of $dcfile, $service debug=$debug_"
 
             # check if volume src dir is already built or not
             dirs=$(docker compose -f $dcfile config $service | grep target | grep src | cut -d: -f2)
@@ -128,9 +129,13 @@ function build_workspace {
                 blue "skip -- already built"
                 continue
             fi
-            docker compose -f $dcfile run --rm $service /launch.sh build
+	    if [[ "$debug_" -eq 1 ]]; then
+		docker compose -f $dcfile run --rm $service /launch.sh build -d
+	    else
+		docker compose -f $dcfile run --rm $service /launch.sh build
+	    fi		
             if [[ $? -ne 0 ]]; then
-                exit
+                exit 1
             fi
         done
     done
