@@ -70,17 +70,18 @@ def people_callback(msg):
     clear_marker = Marker()
     clear_marker.action = Marker.DELETEALL
     array.markers.append(clear_marker)
+    frame_id = msg.header.frame_id
     for person in msg.people:
-        array.markers.append(get_point(person, 0.5))
-        array.markers.append(get_text(person))
-        array.markers.append(get_arrow(person))
+        array.markers.append(get_point(frame_id, person, 0.5))
+        array.markers.append(get_text(frame_id, person))
+        array.markers.append(get_arrow(frame_id, person))
 
     g_pub.publish(array)
 
 
-def init_marker(marker, person, type_, r=0.0, g=0.0, b=0.0, a=1.0):
+def init_marker(frame_id, marker, person, type_, r=0.0, g=0.0, b=0.0, a=1.0):
     marker.header.stamp = g_node.get_clock().now().to_msg()
-    marker.header.frame_id = "map"
+    marker.header.frame_id = frame_id
     marker.id = int(person.name)
     marker.ns = "person_"+type_
     marker.action = Marker.MODIFY
@@ -96,9 +97,9 @@ def init_marker(marker, person, type_, r=0.0, g=0.0, b=0.0, a=1.0):
     marker.color.a = a
 
 
-def get_point(person, size):
+def get_point(frame_id, person, size):
     marker = Marker()
-    init_marker(marker, person, "point", b=1.0)
+    init_marker(frame_id, marker, person, "point", b=1.0)
     marker.type = Marker.SPHERE
     marker.scale.x = size
     marker.scale.y = size
@@ -106,9 +107,9 @@ def get_point(person, size):
     return marker
 
 
-def get_text(person):
+def get_text(frame_id, person):
     marker = Marker()
-    init_marker(marker, person, "text", r=1.0, g=1.0, b=1.0)
+    init_marker(frame_id, marker, person, "text", r=1.0, g=1.0, b=1.0)
     marker.type = Marker.TEXT_VIEW_FACING
     marker.pose.position.z = person.position.z + 0.5
     marker.scale.z = 0.3
@@ -116,9 +117,9 @@ def get_text(person):
     return marker
 
 
-def get_arrow(person):
+def get_arrow(frame_id, person):
     marker = Marker()
-    init_marker(marker, person, "arrow")
+    init_marker(frame_id, marker, person, "arrow")
     marker.type = Marker.ARROW
     v = math.sqrt(math.pow(person.velocity.x, 2)+math.pow(person.velocity.y, 2))
     y = math.atan2(person.velocity.y, person.velocity.x)
