@@ -134,7 +134,7 @@ function build_ros_base_image {
     popd
 }
 
-function prebuild {
+function prebuild_x86_64 {
     local FROM_IMAGE=$1
     local IMAGE_BASE_NAME=$2
     local IMAGE_DIR=$3
@@ -150,7 +150,7 @@ function prebuild {
        . && popd
 }
 
-function prebuild_ros2 {
+function prebuild_ros2_x86_64 {
     blue "- UBUNTU_DISTRO=$ROS2_UBUNTU_DISTRO"
     blue "- ROS2_DISTRO=$ROS2_DISTRO"
 
@@ -163,18 +163,60 @@ function prebuild_ros2 {
     exit 1
     fi
 
-    prebuild $image_tag $base_name $build_dir/${ROS2_DISTRO}-custom image_tag
+    prebuild_x86_64 $image_tag $base_name $build_dir/${ROS2_DISTRO}-custom image_tag
     if [ $? -ne 0 ]; then
     red "failed to build $image_tag"
     return 1
     fi
 
-    prebuild $image_tag $image_tag $build_dir/mesa image_tag
+    prebuild_x86_64 $image_tag $image_tag $build_dir/mesa image_tag
     if [ $? -ne 0 ]; then
     red "failed to build $image_tag"
     return 1
     fi
 }
 
+function prebuild_aarch64 {
+    local FROM_IMAGE=$1
+    local IMAGE_BASE_NAME=$2
+    local IMAGE_DIR=$3
+    local -n IMAGE_TAG=$4         # output variable name
 
-prebuild_ros2
+    IMAGE_TAG=$IMAGE_BASE_NAME-$(basename $IMAGE_DIR)
+
+    pushd $IMAGE_DIR
+    blue "## build $IMAGE_TAG"
+    docker build -t $IMAGE_TAG \
+       --file Dockerfile.jetson \
+       --build-arg FROM_IMAGE=$FROM_IMAGE \
+       . && popd
+}
+
+function prebuild_ros2_aarch64 {
+    blue "- UBUNTU_DISTRO=$ROS2_UBUNTU_DISTRO"
+    blue "- ROS2_DISTRO=$ROS2_DISTRO"
+
+    base_image="nvcr.io/nvidia/l4t-base:r36.2.0"
+    base_name=${prefix}__${ROS2_UBUNTU_DISTRO}
+    image_tag=$base_image
+    build_ros_base_image $image_tag $image_tag $ROS2_UBUNTU_DISTRO $ROS2_DISTRO desktop image_tag
+    if [ $? -ne 0 ]; then
+        red "failed to build $name1"
+        exit 1
+    fi
+
+    prebuild_aarch64 $image_tag $base_name $build_dir/${ROS2_DISTRO}-custom image_tag
+    if [ $? -ne 0 ]; then
+        red "failed to build $image_tag"
+        return 1
+    fi
+}
+
+
+arch=$(uname -m)
+if [ $arch != "x86_64" ] && [ $arch != "aarch64" ]; then
+    red "Unknown architecture: $arch"
+    exit 1
+fi
+
+eval "prebuild_ros2_${arch}"

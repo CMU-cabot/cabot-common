@@ -53,6 +53,8 @@ function build_image {
     local -n time_zone_=$4
     local -n uid_=$5
     local -n prefix_=$6
+    local -n arch_=$7
+    local -n camera_targets_=$8
 
     if [[ ! -z $targets_ ]]; then
         # make target dict
@@ -74,15 +76,65 @@ function build_image {
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
                 continue
             fi
+            if [[ $service = people* ]] && { { [ $arch_ = "x86_64" ] && [[ $service = *jetson* ]]; } || { [ $arch_ = "aarch64" ] && [[ $service != *jetson* ]]; } }; then
+                blue "Skip building different architecture image of $dcfile, $service"
+                continue
+            fi
             blue "Building image of $dcfile, $service"
-            docker compose -f $dcfile build \
-                --build-arg PREFIX=$prefix_ \
-                --build-arg UID=$uid_ \
-                --build-arg TZ=$time_zone_ \
-                $option_ \
-                $service
-            if [[ $? -ne 0 ]]; then
-                exit
+            if [[ $service = people* ]]; then
+                for camera_target in $camera_targets; do
+                    if [ $camera_target != "realsense" ] && [ $camera_target != "framos" ]; then
+                        red "invalid camera target $camera_target"
+                        exit 1
+                    fi
+                    if [ $camera_target != "framos" ] && [[ $service = *framos* ]]; then
+                        blue "Skip building different camera image of $dcfile, $service"
+                        continue
+                    fi
+                    if [ $arch_ = "aarch64" ] && [[ $service = *jetson* ]]; then
+                        from_image=${prefix_}_l4t-${camera_targets}-opencv-humble-custom-open3d
+                        docker compose -f $dcfile build \
+                            --build-arg PREFIX=$prefix_ \
+                            --build-arg FROM_IMAGE=$from_image \
+                            --build-arg UID=$uid_ \
+                            --build-arg TZ=$time_zone_ \
+                            $option_ \
+                            $service
+                    elif [ $arch_ = "x86_64" ] && [[ $service != *jetson* ]]; then
+                        from_image=${prefix_}__jammy-cuda11.7.1-cudnn8-devel-realsense-humble-custom-opencv-open3d-mesa
+                        docker compose -f $dcfile build \
+                            --build-arg PREFIX=$prefix_ \
+                            --build-arg FROM_IMAGE=$from_image \
+                            --build-arg UID=$uid_ \
+                            --build-arg TZ=$time_zone_ \
+                            $option_ \
+                            $service
+                    fi
+                    if [[ $? -ne 0 ]]; then
+                        exit
+                    fi
+                done
+            else
+                if [ $arch_ = "aarch64" ]; then
+                    from_image=${prefix_}__jammy-humble-custom
+                    docker compose -f $dcfile build \
+                        --build-arg PREFIX=$prefix_ \
+                        --build-arg FROM_IMAGE=$from_image \
+                        --build-arg UID=$uid_ \
+                        --build-arg TZ=$time_zone_ \
+                        $option_ \
+                        $service
+                else
+                    docker compose -f $dcfile build \
+                        --build-arg PREFIX=$prefix_ \
+                        --build-arg UID=$uid_ \
+                        --build-arg TZ=$time_zone_ \
+                        $option_ \
+                        $service
+                fi
+                if [[ $? -ne 0 ]]; then
+                    exit
+                fi
             fi
         done
     done
@@ -91,7 +143,8 @@ function build_image {
 function build_workspace {
     local -n dcfiles_=$1
     local -n targets_=$2
-    local -n debug_=$3
+    local -n arch_=$3
+    local -n debug_=$4
     if [[ ! -z $targets_ ]]; then
         # make target dict
         declare -A target_dict
@@ -112,6 +165,10 @@ function build_workspace {
         for service in ${services[@]}; do
             # check if target_dict exists and service is in the target_dict
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
+                continue
+            fi
+            if [[ $service = people* ]] && { { [ $arch_ = "x86_64" ] && [[ $service = *jetson* ]]; } || { [ $arch_ = "aarch64" ] && [[ $service != *jetson* ]]; } }; then
+                blue "Skip building different architecture workspace of $dcfile, $service"
                 continue
             fi
             blue "Building workspace of $dcfile, $service debug=$debug_"
