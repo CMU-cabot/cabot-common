@@ -92,7 +92,7 @@ function build_image {
                         continue
                     fi
                     if [ $arch_ = "aarch64" ] && [[ $service = *jetson* ]]; then
-                        from_image=${prefix_}_l4t-${camera_targets}-opencv-humble-custom-open3d
+                        from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-open3d
                         docker compose -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
                             --build-arg FROM_IMAGE=$from_image \
@@ -101,7 +101,7 @@ function build_image {
                             $option_ \
                             $service
                     elif [ $arch_ = "x86_64" ] && [[ $service != *jetson* ]]; then
-                        from_image=${prefix_}__jammy-cuda11.7.1-cudnn8-devel-${camera_targets}-humble-custom-opencv-open3d-mesa
+                        from_image=${prefix_}__jammy-cuda11.7.1-cudnn8-devel-${camera_target}-humble-custom-opencv-open3d-mesa
                         docker compose -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
                             --build-arg FROM_IMAGE=$from_image \
