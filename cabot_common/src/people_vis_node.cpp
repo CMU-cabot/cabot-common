@@ -58,11 +58,12 @@ public:
 
 private:
 
-  void init_marker(visualization_msgs::msg::Marker &marker,
+  void init_marker(std::string frame_id,
+                   visualization_msgs::msg::Marker &marker,
                    people_msgs::msg::Person &person,
                    std::string type_, float r=0.0, float g=0.0, float b=0.0, float a=1.0) {
     marker.header.stamp = get_clock()->now();
-    marker.header.frame_id = "map";
+    marker.header.frame_id = frame_id;
     marker.id = std::stoi(person.name);
     marker.ns = "person_"+type_;
     marker.action = visualization_msgs::msg::Marker::MODIFY;
@@ -78,9 +79,9 @@ private:
     marker.color.a = a;
   }
 
-  visualization_msgs::msg::Marker get_point(people_msgs::msg::Person &person, float size) {
+  visualization_msgs::msg::Marker get_point(std::string frame_id, people_msgs::msg::Person &person, float size) {
     visualization_msgs::msg::Marker marker;
-    init_marker(marker, person, "point", 0.0, 0.0, 1.0, 1.0);
+    init_marker(frame_id, marker, person, "point", 0.0, 0.0, 1.0, 1.0);
     marker.type = visualization_msgs::msg::Marker::SPHERE;
     marker.scale.x = size;
     marker.scale.y = size;
@@ -89,9 +90,9 @@ private:
   }
 
 
-  visualization_msgs::msg::Marker get_text(people_msgs::msg::Person &person) {
+  visualization_msgs::msg::Marker get_text(std::string frame_id, people_msgs::msg::Person &person) {
     visualization_msgs::msg::Marker marker;
-    init_marker(marker, person, "text", 1.0, 1.0, 1.0);
+    init_marker(frame_id, marker, person, "text", 1.0, 1.0, 1.0);
     marker.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
     marker.pose.position.z = person.position.z + 0.5;
     marker.scale.z = 0.3;
@@ -100,9 +101,9 @@ private:
   }
 
 
-  visualization_msgs::msg::Marker get_arrow(people_msgs::msg::Person &person) {
+  visualization_msgs::msg::Marker get_arrow(std::string frame_id, people_msgs::msg::Person &person) {
     visualization_msgs::msg::Marker marker;
-    init_marker(marker, person, "arrow");
+    init_marker(frame_id, marker, person, "arrow");
     marker.type = visualization_msgs::msg::Marker::ARROW;
     float v = sqrt(pow(person.velocity.x, 2)+pow(person.velocity.y, 2));
     float y = atan2(person.velocity.y, person.velocity.x);
@@ -129,11 +130,12 @@ private:
     clear_marker.action = visualization_msgs::msg::Marker::DELETEALL;
     array.markers.push_back(clear_marker);
     
+    std::string frame_id = input->header.frame_id;
     for (unsigned long i = 0; i < input->people.size(); i++) {
       auto person = input->people[i];
-      array.markers.push_back(get_point(person, 0.5));
-      array.markers.push_back(get_text(person));
-      array.markers.push_back(get_arrow(person));
+      array.markers.push_back(get_point(frame_id, person, 0.5));
+      array.markers.push_back(get_text(frame_id, person));
+      array.markers.push_back(get_arrow(frame_id, person));
     }
     visPub->publish(array);
   }
