@@ -66,7 +66,7 @@ function build_image {
         blue "Building $dcfile"
         services=$(docker compose -f $dcfile config --services)
         if [[ $? -ne 0 ]]; then
-            exit
+            return 1
         fi
         services=$(echo ${services[@]} | grep -v base)
         for service in ${services[@]}; do
@@ -82,7 +82,7 @@ function build_image {
                 $option_ \
                 $service
             if [[ $? -ne 0 ]]; then
-                exit
+                return 1
             fi
         done
     done
@@ -106,7 +106,7 @@ function build_workspace {
         blue "Building $dcfile"
         services=$(docker compose -f $dcfile config --services)
         if [[ $? -ne 0 ]]; then
-            exit
+            return 1
         fi
         services=$(echo ${services[@]} | grep -v base | grep -v lint)
         for service in ${services[@]}; do
@@ -129,13 +129,13 @@ function build_workspace {
                 blue "skip -- already built"
                 continue
             fi
-	    if [[ "$debug_" -eq 1 ]]; then
-		docker compose -f $dcfile run --rm $service /launch.sh build -d
-	    else
-		docker compose -f $dcfile run --rm $service /launch.sh build
-	    fi		
+            if [[ "$debug_" -eq 1 ]]; then
+                docker compose -f $dcfile run --rm $service /launch.sh build -d
+            else
+                docker compose -f $dcfile run --rm $service /launch.sh build
+            fi
             if [[ $? -ne 0 ]]; then
-                exit 1
+                return 1
             fi
         done
     done
