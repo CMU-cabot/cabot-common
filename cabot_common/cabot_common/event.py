@@ -144,7 +144,8 @@ class ClickEvent(BaseEvent):
 
 
 class HoldDownEvent(BaseEvent):
-    TYPE="holddown"
+    TYPE = "holddown"
+
     def __init__(self, type=None, holddown=0):
         type = type if type is not None else HoldDownEvent.TYPE
         super(HoldDownEvent, self).__init__(type=type)

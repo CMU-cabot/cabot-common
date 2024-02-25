@@ -21,12 +21,12 @@
 // Speed Visualize Node
 // Author: Daisuke Sato <daisukes@cmu.edu>
 
+#include <tf2/LinearMath/Quaternion.h>
+#include <math.h>
 #include <rclcpp/rclcpp.hpp>
 #include <people_msgs/msg/people.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <math.h>
 
 using std::placeholders::_1;
 
@@ -57,15 +57,16 @@ public:
   }
 
 private:
-
-  void init_marker(std::string frame_id,
-                   visualization_msgs::msg::Marker &marker,
-                   people_msgs::msg::Person &person,
-                   std::string type_, float r=0.0, float g=0.0, float b=0.0, float a=1.0) {
+  void init_marker(
+    std::string frame_id,
+    visualization_msgs::msg::Marker & marker,
+    people_msgs::msg::Person & person,
+    std::string type_, float r = 0.0, float g = 0.0, float b = 0.0, float a = 1.0)
+  {
     marker.header.stamp = get_clock()->now();
     marker.header.frame_id = frame_id;
     marker.id = std::stoi(person.name);
-    marker.ns = "person_"+type_;
+    marker.ns = "person_" + type_;
     marker.action = visualization_msgs::msg::Marker::MODIFY;
     marker.pose.position.x = person.position.x;
     marker.pose.position.y = person.position.y;
@@ -79,7 +80,8 @@ private:
     marker.color.a = a;
   }
 
-  visualization_msgs::msg::Marker get_point(std::string frame_id, people_msgs::msg::Person &person, float size) {
+  visualization_msgs::msg::Marker get_point(std::string frame_id, people_msgs::msg::Person & person, float size)
+  {
     visualization_msgs::msg::Marker marker;
     init_marker(frame_id, marker, person, "point", 0.0, 0.0, 1.0, 1.0);
     marker.type = visualization_msgs::msg::Marker::SPHERE;
@@ -90,7 +92,8 @@ private:
   }
 
 
-  visualization_msgs::msg::Marker get_text(std::string frame_id, people_msgs::msg::Person &person) {
+  visualization_msgs::msg::Marker get_text(std::string frame_id, people_msgs::msg::Person & person)
+  {
     visualization_msgs::msg::Marker marker;
     init_marker(frame_id, marker, person, "text", 1.0, 1.0, 1.0);
     marker.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
@@ -101,17 +104,18 @@ private:
   }
 
 
-  visualization_msgs::msg::Marker get_arrow(std::string frame_id, people_msgs::msg::Person &person) {
+  visualization_msgs::msg::Marker get_arrow(std::string frame_id, people_msgs::msg::Person & person)
+  {
     visualization_msgs::msg::Marker marker;
     init_marker(frame_id, marker, person, "arrow");
     marker.type = visualization_msgs::msg::Marker::ARROW;
-    float v = sqrt(pow(person.velocity.x, 2)+pow(person.velocity.y, 2));
+    float v = sqrt(pow(person.velocity.x, 2) + pow(person.velocity.y, 2));
     float y = atan2(person.velocity.y, person.velocity.x);
-    
+
     tf2::Quaternion q;
     q.setRPY(0, 0, y);
-    q=q.normalize();
-    
+    q = q.normalize();
+
     marker.pose.orientation.x = q.x();
     marker.pose.orientation.y = q.y();
     marker.pose.orientation.z = q.z();
@@ -122,16 +126,16 @@ private:
     return marker;
   }
 
-  
+
   void peopleCallback(const people_msgs::msg::People::SharedPtr input)
   {
     visualization_msgs::msg::MarkerArray array;
     visualization_msgs::msg::Marker clear_marker;
     clear_marker.action = visualization_msgs::msg::Marker::DELETEALL;
     array.markers.push_back(clear_marker);
-    
+
     std::string frame_id = input->header.frame_id;
-    for (unsigned long i = 0; i < input->people.size(); i++) {
+    for (unsigned int i = 0; i < input->people.size(); i++) {
       auto person = input->people[i];
       array.markers.push_back(get_point(frame_id, person, 0.5));
       array.markers.push_back(get_text(frame_id, person));
@@ -148,8 +152,8 @@ private:
 };  // class PeopleVisNode
 
 }  // namespace CaBot
-//#include <rclcpp_components/register_node_macro.hpp>
-//RCLCPP_COMPONENTS_REGISTER_NODE(CaBot::SpeedVisualizeNode)
+// #include <rclcpp_components/register_node_macro.hpp>
+// RCLCPP_COMPONENTS_REGISTER_NODE(CaBot::SpeedVisualizeNode)
 
 int main(int argc, char * argv[])
 {

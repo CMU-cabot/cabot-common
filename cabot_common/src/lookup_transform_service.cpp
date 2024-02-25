@@ -21,33 +21,31 @@
 // lookup transform service
 // Author: Daisuke Sato <daisukes@cmu.edu>
 
+#include <memory>
 #include "rclcpp/rclcpp.hpp"
 #include "cabot_msgs/srv/lookup_transform.hpp"
-
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
-
-#include <memory>
-
 
 namespace CaBot
 {
 class LookupTransformServiceNode : public rclcpp::Node
 {
- public:
+public:
   explicit LookupTransformServiceNode(const rclcpp::NodeOptions & options)
-      : rclcpp::Node("lookup_transform_service", options),
-        buffer_(this->get_clock(), tf2::durationFromSec(10)),
-        listener_(buffer_)
+  : rclcpp::Node("lookup_transform_service", options),
+    buffer_(this->get_clock(), tf2::durationFromSec(10)),
+    listener_(buffer_)
   {
     service_ = this->create_service<cabot_msgs::srv::LookupTransform>(
-        "lookup_transform",
-        std::bind(&LookupTransformServiceNode::lookupTransform, this, std::placeholders::_1, std::placeholders::_2));
+      "lookup_transform",
+      std::bind(&LookupTransformServiceNode::lookupTransform, this, std::placeholders::_1, std::placeholders::_2));
     RCLCPP_INFO(rclcpp::get_logger("lookup_transform"), "Ready to lookup transform");
   }
 
-  void lookupTransform(const std::shared_ptr<cabot_msgs::srv::LookupTransform::Request> request,
-                        std::shared_ptr<cabot_msgs::srv::LookupTransform::Response> response)
+  void lookupTransform(
+    const std::shared_ptr<cabot_msgs::srv::LookupTransform::Request> request,
+    std::shared_ptr<cabot_msgs::srv::LookupTransform::Response> response)
   {
     try {
       response->transform = buffer_.lookupTransform(request->target_frame, request->source_frame, tf2_ros::fromMsg(request->time));
@@ -72,11 +70,10 @@ class LookupTransformServiceNode : public rclcpp::Node
     }
   }
 
- private:
+private:
   tf2_ros::Buffer buffer_;
   tf2_ros::TransformListener listener_;
   rclcpp::Service<cabot_msgs::srv::LookupTransform>::SharedPtr service_;
-
 };  // class LookupTransformServiceNode
 
 }  // namespace CaBot
