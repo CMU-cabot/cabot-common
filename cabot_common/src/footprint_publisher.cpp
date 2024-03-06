@@ -21,6 +21,12 @@
 // lookup transform service
 // Author: Daisuke Sato <daisukes@cmu.edu>
 
+
+#include <math.h>
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <geometry_msgs/msg/polygon.hpp>
@@ -28,17 +34,13 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
-#include <math.h>
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <vector>
-
 enum Mode { UNKNOWN = -1, NORMAL = 0, SMALLEST = 1, DYNAMIC = 2, SMALL = 3 };
 
-class FootprintPublisher : public rclcpp::Node {
- private:
-  void check_status(diagnostic_updater::DiagnosticStatusWrapper& stat) {
+class FootprintPublisher : public rclcpp::Node
+{
+private:
+  void check_status(diagnostic_updater::DiagnosticStatusWrapper & stat)
+  {
     RCLCPP_INFO(this->get_logger(), "check_status");
 
     if (current_mode_ == Mode::UNKNOWN) {
@@ -50,18 +52,22 @@ class FootprintPublisher : public rclcpp::Node {
       return;
     }
     if (footprint_ == nullptr) {
-      stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN,
-                   "No footprint (mode=" + std::to_string(current_mode_) + ")");
+      stat.summary(
+        diagnostic_msgs::msg::DiagnosticStatus::WARN,
+        "No footprint (mode=" + std::to_string(current_mode_) + ")");
       return;
     }
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "working (mode=" + std::to_string(current_mode_) + ")");
   }
 
- public:
-  FootprintPublisher() : Node("footprint_publisher"), current_mode_(Mode::UNKNOWN) {
+public:
+  FootprintPublisher()
+  : Node("footprint_publisher"), current_mode_(Mode::UNKNOWN)
+  {
     this->declare_parameter("footprint_mode", static_cast<int>(Mode::NORMAL));
-    this->declare_parameter("footprint_topics",
-                            std::vector<std::string>{"/global_costmap/footprint", "/local_costmap/footprint"});
+    this->declare_parameter(
+      "footprint_topics",
+      std::vector<std::string>{"/global_costmap/footprint", "/local_costmap/footprint"});
     this->declare_parameter("footprint_normal", 0.45);
     this->declare_parameter("footprint_smallest", 0.35);
     this->declare_parameter("footprint_small", 0.40);
@@ -74,7 +80,7 @@ class FootprintPublisher : public rclcpp::Node {
     std::vector<std::string> footprint_topics;
     this->get_parameter("footprint_topics", footprint_topics);
 
-    for (const auto& topic : footprint_topics) {
+    for (const auto & topic : footprint_topics) {
       auto publisher = this->create_publisher<geometry_msgs::msg::Polygon>(topic, 10);
       publishers_.push_back(publisher);
     }
@@ -82,7 +88,7 @@ class FootprintPublisher : public rclcpp::Node {
     joint_state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
 
     timer_ =
-        this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&FootprintPublisher::timer_callback, this));
+      this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&FootprintPublisher::timer_callback, this));
 
     updater_ = std::make_shared<diagnostic_updater::Updater>(this);
     updater_->setHardwareID("Footprint Publisher");
@@ -94,8 +100,9 @@ class FootprintPublisher : public rclcpp::Node {
     RCLCPP_INFO(this->get_logger(), "constructor completed");
   }
 
- private:
-  void timer_callback() {
+private:
+  void timer_callback()
+  {
     int new_mode;
     this->get_parameter("footprint_mode", new_mode);
 
@@ -106,7 +113,7 @@ class FootprintPublisher : public rclcpp::Node {
       if (footprint_ == nullptr) {
         return;
       }
-      for (const auto& publisher : publishers_) {
+      for (const auto & publisher : publishers_) {
         publisher->publish(*footprint_);
       }
     }
@@ -115,7 +122,8 @@ class FootprintPublisher : public rclcpp::Node {
     joint_state_pub_->publish(joint_state);
   }
 
-  geometry_msgs::msg::Polygon::SharedPtr get_footprint(Mode mode) {
+  geometry_msgs::msg::Polygon::SharedPtr get_footprint(Mode mode)
+  {
     sensor_msgs::msg::JointState state;
 
     double footprint = 0;
@@ -134,7 +142,8 @@ class FootprintPublisher : public rclcpp::Node {
     return circle_footprint(footprint);
   }
 
-  geometry_msgs::msg::Polygon::SharedPtr circle_footprint(double radius) {
+  geometry_msgs::msg::Polygon::SharedPtr circle_footprint(double radius)
+  {
     int N = 16;
     auto polygon = std::make_shared<geometry_msgs::msg::Polygon>();
     for (int w = 0; w < N; w++) {
@@ -147,7 +156,8 @@ class FootprintPublisher : public rclcpp::Node {
     return polygon;
   }
 
-  sensor_msgs::msg::JointState get_offset_joint_state(Mode mode) {
+  sensor_msgs::msg::JointState get_offset_joint_state(Mode mode)
+  {
     sensor_msgs::msg::JointState t;
     double offset = 0;
     if (mode == Mode::NORMAL) {
@@ -165,7 +175,8 @@ class FootprintPublisher : public rclcpp::Node {
   }
 
   rcl_interfaces::msg::SetParametersResult param_set_callback(
-      const std::vector<rclcpp::Parameter> & params) {
+    const std::vector<rclcpp::Parameter> & params)
+  {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     return result;
@@ -180,7 +191,8 @@ class FootprintPublisher : public rclcpp::Node {
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-int main(int argc, char** argv) {
+int main(int argc, char ** argv)
+{
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<FootprintPublisher>());
   rclcpp::shutdown();
