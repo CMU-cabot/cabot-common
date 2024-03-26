@@ -92,6 +92,10 @@ function build_image {
                         continue
                     fi
                     if [ $arch_ = "aarch64" ] && [[ $service = *jetson* ]]; then
+                        # disable BuildKit to avoid build error for NVIDIA container
+                        # https://github.com/NVIDIA/nvidia-container-toolkit/issues/221
+                        export DOCKER_BUILDKIT=0
+
                         from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-open3d
                         docker compose -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
