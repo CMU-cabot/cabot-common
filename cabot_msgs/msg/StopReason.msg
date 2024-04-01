@@ -21,3 +21,4 @@
 std_msgs/Header header
 string reason
 float64 duration
+bool summary
