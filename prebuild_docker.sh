@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) 2020, 2023  Carnegie Mellon University, IBM Corporation, and others
 #
@@ -74,11 +74,15 @@ while getopts "ho:P:" arg; do
 done
 shift $((OPTIND-1))
 
+ros_component=$1
+if [[ -z $ros_component ]]; then
+    ros_component="desktop"
+fi
+
 if [[ -z $prefix ]]; then
     help
     exit 1
 fi
-
 
 function build_ros_base_image {
     local FROM_IMAGE=$1
@@ -117,7 +121,7 @@ function build_ros_base_image {
     popd
 
     if [[ $ROS_COMPONENT = "ros-base" ]]; then
-    returnn
+	return
     fi
 
     echo ""
@@ -176,5 +180,30 @@ function prebuild_ros2 {
     fi
 }
 
+function prebuild_ros2_base {
+    blue "- UBUNTU_DISTRO=$ROS2_UBUNTU_DISTRO"
+    blue "- ROS2_DISTRO=$ROS2_DISTRO"
 
-prebuild_ros2
+    base_image=ubuntu:$ROS2_UBUNTU_DISTRO
+    base_name=${prefix}__${ROS2_UBUNTU_DISTRO}
+    image_tag=$base_image
+    build_ros_base_image $image_tag $image_tag $ROS2_UBUNTU_DISTRO $ROS2_DISTRO ros-base image_tag
+    if [ $? -ne 0 ]; then
+    red "failed to build $name1"
+    exit 1
+    fi
+
+    prebuild $image_tag $base_name $build_dir/${ROS2_DISTRO}-base-custom image_tag
+    if [ $? -ne 0 ]; then
+    red "failed to build $image_tag"
+    return 1
+    fi
+}
+
+if [[ $ros_component = "desktop" ]]; then
+    prebuild_ros2
+fi
+if [[ $ros_component = "ros-base" ]]; then
+    prebuild_ros2_base
+fi
+
