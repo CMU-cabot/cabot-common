@@ -177,7 +177,7 @@ private:
   }
 
   rcl_interfaces::msg::SetParametersResult param_set_callback(
-    const std::vector<rclcpp::Parameter> /*& params*/)
+    const std::vector<rclcpp::Parameter>/*& params*/)
   {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
