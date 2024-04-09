@@ -9,6 +9,10 @@ repositories:
     type: git
     url: https://github.com/cmu-cabot/HesaiLidar_General_ros
     version: ros2-humble
+  docker/humble-custom/livox_ros2_driver:
+    type: git
+    url: https://github.com/DroneBase/livox_ros2_driver.git
+    version: 72cb73e
   docker/humble-custom/people:
     # not distributed
     type: git

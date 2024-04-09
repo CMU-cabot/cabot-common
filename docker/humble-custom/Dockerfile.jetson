@@ -20,6 +20,21 @@ RUN apt update && apt install -q -y --no-install-recommends \
 RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
     colcon mixin update default
 
+# downgrade libopencv-dev for ROS2
+RUN apt update && apt install -q -y --no-install-recommends --allow-downgrades \
+    libopencv-dev=4.5.4+dfsg-9ubuntu4 \
+    && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# add gazebo repository for arm
+RUN apt update && apt install -q -y --no-install-recommends \
+    software-properties-common \
+    && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    add-apt-repository ppa:openrobotics/gazebo11-non-amd64
+
 RUN apt update && \
     apt install -y --no-install-recommends \
     libapr1-dev \
