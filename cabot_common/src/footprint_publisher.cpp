@@ -105,8 +105,9 @@ private:
   {
     int new_mode;
     this->get_parameter("footprint_mode", new_mode);
-
-    if (static_cast<Mode>(new_mode) != current_mode_) {
+    count++;
+    if (static_cast<Mode>(new_mode) != current_mode_ || count > 10) {
+      count = 0;
       RCLCPP_INFO(this->get_logger(), "mode updated, %d -> %d", current_mode_, new_mode);
       current_mode_ = static_cast<Mode>(new_mode);
       footprint_ = get_footprint(current_mode_);
@@ -134,6 +135,7 @@ private:
     } else if (mode == Mode::SMALL) {
       footprint = this->get_parameter("footprint_small").get_value<double>();
     }
+    RCLCPP_INFO(this->get_logger(), "Footprint size=%.2f", footprint);
 
     if (footprint == 0) {
       return nullptr;
@@ -175,13 +177,14 @@ private:
   }
 
   rcl_interfaces::msg::SetParametersResult param_set_callback(
-    const std::vector<rclcpp::Parameter> & params)
+    const std::vector<rclcpp::Parameter>/*& params*/)
   {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
     return result;
   }
 
+  int count = 0;
   std::shared_ptr<diagnostic_updater::Updater> updater_;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr callback_handler_;
   geometry_msgs::msg::Polygon::SharedPtr footprint_;
