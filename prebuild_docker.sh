@@ -42,6 +42,7 @@ function help {
     echo ""
     echo "-h                    show this help"
     echo "-o <option>           prebuild with option"
+    echo "-a <arch> target architecture (default=$arch, your architecture)"
     echo "-P <prefix>           prebuild with prefix"
 }
 
@@ -57,8 +58,9 @@ build_dir=$scriptdir/docker
 
 prefix=
 option="--progress=auto"
+arch=$(uname -m)
 
-while getopts "ho:P:" arg; do
+while getopts "ho:a:P:" arg; do
     case $arg in
     h)
         help
@@ -66,6 +68,12 @@ while getopts "ho:P:" arg; do
         ;;
     o)
         option=$OPTARG
+        ;;
+    a)
+        if [ $OPTARG != $arch ]; then
+            export DOCKER_DEFAULT_PLATFORM=linux/$OPTARG
+        fi
+        arch=$OPTARG
         ;;
     P)
         prefix=${OPTARG}
@@ -213,7 +221,6 @@ function prebuild_ros2_aarch64 {
 }
 
 
-arch=$(uname -m)
 if [ $arch != "x86_64" ] && [ $arch != "aarch64" ]; then
     red "Unknown architecture: $arch"
     exit 1
