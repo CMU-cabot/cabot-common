@@ -13,6 +13,11 @@ repositories:
     type: git
     url: https://github.com/DroneBase/livox_ros2_driver.git
     version: 72cb73e
+  docker/humble-custom/livox_laser_simulation_ros2:
+    # not distributed
+    type: git
+    url: https://github.com/CMU-cabot/livox_laser_simulation_ros2.git
+    version: cabot-main
   docker/humble-custom/people:
     # not distributed
     type: git
