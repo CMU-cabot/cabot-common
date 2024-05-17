@@ -23,6 +23,7 @@
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
+#include <regex>
 #include <rclcpp/rclcpp.hpp>
 #include <people_msgs/msg/people.hpp>
 #include <visualization_msgs/msg/marker.hpp>
@@ -65,7 +66,7 @@ private:
   {
     marker.header.stamp = get_clock()->now();
     marker.header.frame_id = frame_id;
-    marker.id = std::stoi(person.name);
+    marker.id = std::stoi(std::regex_replace(person.name, std::regex("[^0-9]+"), "")); // remove non digit characters and convert to int, e.g., "actor0" -> "0" -> 0)
     marker.ns = "person_" + type_;
     marker.action = visualization_msgs::msg::Marker::MODIFY;
     marker.pose.position.x = person.position.x;
