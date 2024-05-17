@@ -21,6 +21,7 @@
 
 
 import math
+import re
 import sys
 
 import rclpy
@@ -82,7 +83,7 @@ def people_callback(msg):
 def init_marker(frame_id, marker, person, type_, r=0.0, g=0.0, b=0.0, a=1.0):
     marker.header.stamp = g_node.get_clock().now().to_msg()
     marker.header.frame_id = frame_id
-    marker.id = int(person.name)
+    marker.id = int(re.sub(r"[^0-9]+", "", person.name))  # remove non digit characters and convert to int, e.g., "actor0" -> "0" -> 0)
     marker.ns = "person_"+type_
     marker.action = Marker.MODIFY
     marker.pose.position.x = person.position.x
