@@ -66,7 +66,7 @@ private:
   {
     marker.header.stamp = get_clock()->now();
     marker.header.frame_id = frame_id;
-    marker.id = std::stoi(std::regex_replace(person.name, std::regex("[^0-9]+"), "")); // remove non digit characters and convert to int, e.g., "actor0" -> "0" -> 0)
+    marker.id = std::stoi(std::regex_replace(person.name, std::regex("[^0-9]+"), ""));  // remove non digit characters and convert to int, e.g., "actor0" -> "0" -> 0)
     marker.ns = "person_" + type_;
     marker.action = visualization_msgs::msg::Marker::MODIFY;
     marker.pose.position.x = person.position.x;
