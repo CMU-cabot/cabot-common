@@ -97,7 +97,7 @@ function build_image {
                         export DOCKER_BUILDKIT=0
 
                         from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-open3d
-                        docker compose -f $dcfile build \
+                        docker compose -p ${prefix_} -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
                             --build-arg FROM_IMAGE=$from_image \
                             --build-arg UID=$uid_ \
@@ -110,7 +110,7 @@ function build_image {
                         else
                             from_image=${prefix_}__jammy-humble-custom-mesa
                         fi
-                        docker compose -f $dcfile build \
+                        docker compose -p ${prefix_} -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
                             --build-arg FROM_IMAGE=$from_image \
                             --build-arg UID=$uid_ \
@@ -125,7 +125,7 @@ function build_image {
             else
                 if [ $arch_ = "aarch64" ]; then
                     from_image=${prefix_}__jammy-humble-custom
-                    docker compose -f $dcfile build \
+                    docker compose -p ${prefix_} -f $dcfile build \
                         --build-arg PREFIX=$prefix_ \
                         --build-arg FROM_IMAGE=$from_image \
                         --build-arg UID=$uid_ \
@@ -133,7 +133,7 @@ function build_image {
                         $option_ \
                         $service
                 else
-                    docker compose -f $dcfile build \
+                    docker compose -p ${prefix_} -f $dcfile build \
                         --build-arg PREFIX=$prefix_ \
                         --build-arg UID=$uid_ \
                         --build-arg TZ=$time_zone_ \
