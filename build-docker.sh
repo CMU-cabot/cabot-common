@@ -58,5 +58,7 @@ else
     docker buildx bake
 fi
 
+docker pull localhost:5000/cabot-base-humble-desktop-custom-mesa
 docker image tag localhost:5000/cabot-base-humble-desktop-custom-mesa ${prefix}__jammy-humble-custom-mesa
+docker pull localhost:5000/cabot-base-humble-base-custom
 docker image tag localhost:5000/cabot-base-humble-base-custom ${prefix}__jammy-humble-base-custom
