@@ -133,7 +133,9 @@ function build_image {
                         $option_ \
                         $service
                 else
+                    from_image=localhost:5000/cabot-base-humble-desktop-custom-mesa
                     docker compose -p ${prefix_} -f $dcfile build \
+                        --build-arg FROM_IMAGE=$from_image \
                         --build-arg PREFIX=$prefix_ \
                         --build-arg UID=$uid_ \
                         --build-arg TZ=$time_zone_ \
