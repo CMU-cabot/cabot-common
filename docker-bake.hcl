@@ -10,156 +10,100 @@ variable "UBUNTU_DISTRO" {
   default = "jammy"
 }
 
-variable "FROM_IMAGE" {
-  default = "cmucal/cabot-base"
+variable "BASE_IMAGE" {
+  default = "cabot-base"
+}
+
+variable "REGISTRY" {
+  default = "localhost:5000"
 }
 
 group "default" {
   targets = [
+    "cabot-base",
     "ros-core",
     "ros-base",
     "ros-desktop",
     "ros-base-custom",
+    # "ros-base-custom-mesa",
     "ros-desktop-custom",
     "ros-desktop-custom-mesa"
   ]
 }
 
-target "ros-core" {
-  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-core"
+target "cabot-base" {
+  context    = "./docker/base"
   dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}" ]
+  platforms  = "${PLATFORMS}"
+  tags       = [ "${REGISTRY}/cabot-base:latest" ]
+  output     = [ "type=registry" ]
+}
+
+target "ros-common" {
+  platforms  = "${PLATFORMS}"
+  output     = [ "type=registry" ]
+}
+
+target "ros-core" {
+  inherits   = [ "ros-common" ]
+  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-core"
+  dockerfile = "Dockerfile.tmp"
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}" = "target:cabot-base" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}" ]
 }
 
 target "ros-base" {
+  inherits   = [ "ros-common" ]
   context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-base"
-  dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}-base" ]
-  depends_on = ["ros-core"]
+  dockerfile = "Dockerfile.tmp"
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}" = "target:ros-core" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" ]
 }
 
 target "ros-desktop" {
+  inherits   = [ "ros-common" ]
   context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/desktop"
-  dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-base" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}-desktop" ]
-  depends_on = ["ros-base"]
+  dockerfile = "Dockerfile.tmp"
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" = "target:ros-base" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop" ]
 }
 
 target "ros-base-custom" {
+  inherits   = [ "ros-common" ]
   context    = "./docker/humble-custom"
   dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-base" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}-base-custom" ]
-  output    = [ "type=docker" ]
-  depends_on = ["ros-base"]
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" = "target:ros-base" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base-custom" ]
+}
+
+target "ros-base-custom-mesa" {
+  inherits   = [ "ros-common" ]
+  context    = "./docker/mesa"
+  dockerfile = "Dockerfile"
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base" = "target:ros-base-custom" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base-custom" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-base-custom-mesa" ]
 }
 
 target "ros-desktop-custom" {
+  inherits   = [ "ros-common" ]
   context    = "./docker/humble-custom"
   dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-desktop" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}-desktop-custom" ]
-  depends_on = ["ros-desktop"]
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop" = "target:ros-desktop" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop-custom" ]
 }
 
 target "ros-desktop-custom-mesa" {
+  inherits   = [ "ros-common" ]
   context    = "./docker/mesa"
   dockerfile = "Dockerfile"
-  platforms = "${PLATFORMS}"
-  args      = { FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-desktop-custom" }
-  tags      = [ "${FROM_IMAGE}-${ROS_DISTRO}-desktop-custom-mesa" ]
-  depends_on = ["ros-desktop-custom"]
+  platforms  = "${PLATFORMS}"
+  contexts   = { "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop-custom" = "target:ros-desktop-custom" }
+  args       = { FROM_IMAGE = "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop-custom" }
+  tags       = [ "${REGISTRY}/${BASE_IMAGE}-${ROS_DISTRO}-desktop-custom-mesa" ]
 }
-
-
-
-/*
-target "ros-core" {
-  name = "ros-core-${item.short}"
-  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-core"
-  dockerfile = "Dockerfile"
-  matrix    = {
-    item = [
-      { short = "amd64", platform = "linux/amd64", from_image = "${FROM_IMAGE_AMD64}" },
-      { short = "arm64", platform = "linux/arm64", from_image = "${FROM_IMAGE_ARM64}" },
-    ]
-  }
-  platforms = [ item.platform ]
-  args      = { FROM_IMAGE = item.from_image }
-  tags      = [ "${item.from_image}-${ROS_DISTRO}" ]
-}
-
-target "ros-base" {
-  name = "ros-base-${item.short}"
-  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-base"
-  dockerfile = "Dockerfile"
-  matrix    = {
-    item = [
-      { short = "amd64", platform = "linux/amd64", from_image = "${FROM_IMAGE_AMD64}" },
-      { short = "arm64", platform = "linux/arm64", from_image = "${FROM_IMAGE_ARM64}" },
-    ]
-  }
-  platforms = [ item.platform ]
-  args      = { FROM_IMAGE = "${item.from_image}-${ROS_DISTRO}" }
-  tags      = [ "${item.from_image}-${ROS_DISTRO}-base" ]
-}
-*/
-
-/*
-
-target "ros-base" {
-  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/ros-base"
-  dockerfile = "Dockerfile"
-  args = {
-    FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}"
-  }
-  platforms  = [
-    "linux/amd64",
-    "linux/arm64"
-  ]
-  tags       = [
-    "${FROM_IMAGE_AMD64}-${ROS_DISTRO}-base-amd64",
-    "${FROM_IMAGE_ARM64}-${ROS_DISTRO}-base-arm64"
-  ]
-}
-
-target "ros-desktop" {
-  context    = "./docker/docker_images/ros/${ROS_DISTRO}/ubuntu/${UBUNTU_DISTRO}/desktop"
-  dockerfile = "Dockerfile"
-  args = {
-    FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-base"
-  }
-  platforms  = [
-    "linux/amd64",
-    "linux/arm64"
-  ]
-  tags       = [
-    "${FROM_IMAGE_AMD64}-${ROS_DISTRO}-desktop-amd64",
-    "${FROM_IMAGE_ARM64}-${ROS_DISTRO}-desktop-arm64"
-  ]
-}
-
-target "custom" {
-  context    = "./docker/${ROS_DISTRO}-custom"
-  dockerfile = "Dockerfile"
-  args = {
-    FROM_IMAGE = "${FROM_IMAGE}-${ROS_DISTRO}-desktop"
-  }
-  platforms  = [
-    "linux/amd64",
-    "linux/arm64"
-  ]
-  tags       = [
-    "${FROM_IMAGE_AMD64}-${ROS_DISTRO}-desktop-amd64",
-    "${FROM_IMAGE_ARM64}-${ROS_DISTRO}-desktop-arm64"
-  ]
-}
-*/
