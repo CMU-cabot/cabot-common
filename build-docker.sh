@@ -9,7 +9,7 @@ function help {
 }
 
 platform=linux/amd64
-if [[ $(uname -e) = "aarch64" ]]; then
+if [[ $(uname -i) = "aarch64" ]]; then
     platform=linux/arm64
 fi
 prefix=
