@@ -1,0 +1,25 @@
+name: Test Building Docker Image and Workspace
+
+on:
+  push:
+    branches: [ daisukes/docker-buildx-bake-test ]
+
+jobs:
+  test_build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: docker/setup-qemu-action@v3
+
+    - name: Install vcs
+      run: pip3 install vcstool
+
+    - name: Prepare thirdparty repos
+      run: ./setup-dependency.sh
+
+    - name: Prepare local docker registry
+      run: docker compose up -d
+
+    - name: Buildx bake
+      run:  ./build-docker.sh -P cabot-navigation

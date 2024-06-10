@@ -37,13 +37,16 @@ fi
 
 export ROS_DISTRO=humble
 export UBUNTU_DISTRO=jammy
+export REGISTRY=registry:5000
 
 # setup local docker registry for multiplatform support
 docker compose up -d
 
 # setup multiplatform builder
+docker buildx rm mybuilder
 docker buildx create --use --name mybuilder --driver docker-container \
-       --driver-opt network=host  # option to make the builder access to the registry on the localhost
+       --config buildkitd.toml \
+       --driver-opt network=registry-network  # option to make the builder access to the registry on the localhost
 
 # replace ros Dockerfile FROM instruction to replace base image
 while read -r line; do
@@ -57,6 +60,8 @@ if [[ -n $platform ]]; then
 else
     docker buildx bake
 fi
+
+
 
 docker pull localhost:5000/cabot-base-humble-desktop-custom-mesa
 docker image tag localhost:5000/cabot-base-humble-desktop-custom-mesa ${prefix}__jammy-humble-custom-mesa

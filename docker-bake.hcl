@@ -15,7 +15,7 @@ variable "BASE_IMAGE" {
 }
 
 variable "REGISTRY" {
-  default = "localhost:5000"
+  default = "registry"
 }
 
 group "default" {

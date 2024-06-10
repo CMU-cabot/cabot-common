@@ -3,3 +3,10 @@ services:
     image: registry:2.7
     ports:
       - 127.0.0.1:5000:5000
+    networks:
+      - registry-network
+
+
+networks:
+  registry-network:
+    name: registry-network
