@@ -117,10 +117,11 @@ function build_ros_base_image {
     popd
 
     if [[ $ROS_COMPONENT = "ros-base" ]]; then
-    returnn
+        return
     fi
 
     echo ""
+    FROM_IMAGE=$IMAGE_TAG
     IMAGE_TAG=$IMAGE_TAG_PREFIX-$ROS_DISTRO-desktop
     blue "## build $IMAGE_TAG"
     pushd $build_dir/docker_images/ros/$ROS_DISTRO/ubuntu/$UBUNTU_DISTRO/desktop/
