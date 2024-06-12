@@ -43,7 +43,7 @@ export REGISTRY=registry:5000
 docker compose up -d
 
 # setup multiplatform builder
-docker buildx rm mybuilder
+# docker buildx rm mybuilder
 docker buildx create --use --name mybuilder --driver docker-container \
        --config buildkitd.toml \
        --driver-opt network=registry-network  # option to make the builder access to the registry on the localhost
