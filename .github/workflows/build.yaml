@@ -18,8 +18,5 @@ jobs:
     - name: Prepare thirdparty repos
       run: ./setup-dependency.sh
 
-    - name: Prepare local docker registry
-      run: docker compose up -d
-
     - name: Buildx bake
       run:  ./bake-docker.sh -P cabot-navigation
