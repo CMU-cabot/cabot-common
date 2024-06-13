@@ -4,6 +4,8 @@ FROM $FROM_IMAGE as base
 
 ENV ROS_DISTRO=humble
 
+ARG TARGETARCH
+
 # downgrade libopencv-dev for ROS2
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -q -y --no-install-recommends --allow-downgrades \
