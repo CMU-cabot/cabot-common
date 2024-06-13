@@ -68,11 +68,13 @@ fi
 export ROS_DISTRO=humble
 export UBUNTU_DISTRO=jammy
 
+if [[ -z $(docker network ls | grep "registry-network") ]]; then
+    docker network create registry-network
+fi
 if [[ $local -eq 1 ]]; then
     export REGISTRY=registry:5000
     # setup local docker registry for multiplatform support
     if [[ -z $(docker ps -f "name=registry" -q) ]]; then
-        docker network create registry-network
         docker run -d \
         --rm \
             --name registry \
