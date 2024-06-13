@@ -22,4 +22,4 @@ jobs:
       run: docker compose up -d
 
     - name: Buildx bake
-      run:  ./build-docker.sh -P cabot-navigation
+      run:  ./bake-docker.sh -P cabot-navigation
