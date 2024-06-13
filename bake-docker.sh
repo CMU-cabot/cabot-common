@@ -40,13 +40,30 @@ export UBUNTU_DISTRO=jammy
 export REGISTRY=registry:5000
 
 # setup local docker registry for multiplatform support
-docker compose up -d
+if [[ -z $(docker ps -f "name=registry" -q) ]]; then
+    docker network create registry-network
+    docker run -d \
+	--rm \
+        --name registry \
+        --network registry-network \
+        -p 127.0.0.1:5000:5000 \
+        registry:2.7
+fi
 
 # setup multiplatform builder
 # docker buildx rm mybuilder
-docker buildx create --use --name mybuilder --driver docker-container \
-       --config buildkitd.toml \
-       --driver-opt network=registry-network  # option to make the builder access to the registry on the localhost
+if [[ -z $(docker buildx ls | grep "mybuilder\*") ]]; then
+    echo "mybuilder is not selected"
+    if [[ -z $(docker buildx ls | grep mybuilder) ]]; then
+	echo "creating mybuilde"
+        docker buildx create --use --name mybuilder --driver docker-container \
+           --config buildkitd.toml \
+           --driver-opt network=registry-network  # option to make the builder access to the registry on the localhost
+    else
+	echo "use mybuilde"
+	docker buildx use mybuilder
+    fi
+fi
 
 # replace ros Dockerfile FROM instruction to replace base image
 while read -r line; do
@@ -62,6 +79,7 @@ else
 fi
 
 
+docker buildx use default
 
 docker pull localhost:5000/cabot-base-humble-desktop-custom-mesa
 docker image tag localhost:5000/cabot-base-humble-desktop-custom-mesa ${prefix}__jammy-humble-custom-mesa
