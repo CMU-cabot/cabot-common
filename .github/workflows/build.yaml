@@ -19,6 +19,7 @@ jobs:
       run: ./setup-dependency.sh
 
     - name: Buildx bake
+      shell: bash
       env:
         DOCKERHUB_TOKEN: ${{ secrets.dockerhub-token }}
       run:  |
