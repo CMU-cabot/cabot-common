@@ -19,4 +19,8 @@ jobs:
       run: ./setup-dependency.sh
 
     - name: Buildx bake
-      run:  ./bake-docker.sh -P cabot-navigation
+      env:
+        DOCKERHUB_TOKEN: ${{ secrets.dockerhub-token }}
+      run:  |
+        docker login -u daisukesato80 -p "$DOCKERHUB_TOKEN"
+        ./bake-docker.sh -P cabot-navigation

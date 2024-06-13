@@ -5,7 +5,7 @@ FROM $FROM_IMAGE as base
 ENV ROS_DISTRO=humble
 
 # downgrade libopencv-dev for ROS2
-RUN if [ "$TARGETARCH" = "linux/arm64" ]; then \
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -q -y --no-install-recommends --allow-downgrades \
         libopencv-dev=4.5.4+dfsg-9ubuntu4 \
         && \
@@ -15,7 +15,7 @@ RUN if [ "$TARGETARCH" = "linux/arm64" ]; then \
     fi
 
 # add gazebo repository for arm
-RUN if [ "$TARGETARCH" = "linux/arm64" ]; then \
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -q -y --no-install-recommends \
         software-properties-common \
         && \
