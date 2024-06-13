@@ -33,7 +33,11 @@ group "default" {
 
 target "cabot-base" {
   context    = "./docker/base"
-  dockerfile = "Dockerfile"
+  dockerfile-inline = <<EOF
+FROM --platform=linux/amd64 ubuntu:jammy as build-amd64
+FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-base:r36.2.0 as build-arm64
+FROM build-$TARGETARCH
+EOF
   platforms  = "${PLATFORMS}"
   tags       = [ "${REGISTRY}/cabot-base:latest" ]
   output     = [ "type=registry" ]

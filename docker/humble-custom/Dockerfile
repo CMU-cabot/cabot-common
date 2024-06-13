@@ -31,6 +31,7 @@ RUN apt update && \
     libaprutil1-dev \
     libasio-dev \
     libpcap-dev \
+    python3-pip \
     ros-$ROS_DISTRO-camera-info-manager \
     ros-$ROS_DISTRO-cyclonedds \
     ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
