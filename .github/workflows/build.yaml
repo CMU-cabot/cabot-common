@@ -20,8 +20,6 @@ jobs:
 
     - name: Buildx bake
       shell: bash
-      env:
-        DOCKERHUB_TOKEN: ${{ secrets.dockerhub-token }}
       run:  |
-        docker login -u daisukesato80 -p "$DOCKERHUB_TOKEN"
+        docker login -u daisukesato80 -p "${{ secrets.DOCKERHUB_TOKEN }}"
         ./bake-docker.sh -P cabot-navigation
