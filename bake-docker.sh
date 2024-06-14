@@ -81,14 +81,14 @@ if [[ -z $(docker network ls | grep "registry-network") ]]; then
     docker network create registry-network
 fi
 if [[ $local -eq 1 ]]; then
-    export REGISTRY=registry:9092
+    export REGISTRY=registry:5000
     # setup local docker registry for multiplatform support
     if [[ -z $(docker ps -f "name=registry" -q) ]]; then
         docker run -d \
         --rm \
             --name registry \
             --network registry-network \
-            -p 127.0.0.1:9092:9092 \
+            -p 127.0.0.1:9092:5000 \
             registry:2.7
     fi
 fi

@@ -1,4 +1,4 @@
-[registry."registry:9092"]
+[registry."registry:5000"]
 http = true
 insecure = true
 
