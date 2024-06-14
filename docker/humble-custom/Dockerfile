@@ -8,8 +8,6 @@ ARG TARGETARCH
 
 # downgrade libopencv-dev for ROS2
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
-	sed -i.bak -r 's!http://ports.ubuntu.com/ubuntu-ports/!https://mirror.kumi.systems/ubuntu-ports/!' /etc/apt/sources.list && \
-	cat /etc/apt/sources.list && \
         apt update && apt install -q -y --no-install-recommends --allow-downgrades \
         libopencv-dev=4.5.4+dfsg-9ubuntu4 \
         && \
