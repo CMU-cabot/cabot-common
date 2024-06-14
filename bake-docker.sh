@@ -31,7 +31,7 @@ function help {
     echo "Usage: $0 [-l] [-P <prefix>] [-p <platform>]"
     echo ""
     echo "-h                    show this help"
-    echo "-d                    build only for the host machine platform"
+    echo "-d                    debug - shorthand for -l and -p with host platform"
     echo "-l                    build using local registry"
     echo "-p <platform>         specify platform"
     echo "                      build linux/arm64 and linux/amd64 if not specified"
@@ -49,12 +49,13 @@ while getopts "hdlp:P:" arg; do
         exit
         ;;
     d)
-	if [[ $(uname -m) = "x86_64" ]]; then
+        if [[ $(uname -m) = "x86_64" ]]; then
             platform="linux/amd64"
-	elif [[ $(uname -m) = "aarch64" ]]; then
+        elif [[ $(uname -m) = "aarch64" ]]; then
             platform="linux/arm64"
-	fi
-	;;
+        fi
+        local=1
+        ;;
     l)
         local=1
         ;;
@@ -80,14 +81,14 @@ if [[ -z $(docker network ls | grep "registry-network") ]]; then
     docker network create registry-network
 fi
 if [[ $local -eq 1 ]]; then
-    export REGISTRY=registry:5000
+    export REGISTRY=registry:9092
     # setup local docker registry for multiplatform support
     if [[ -z $(docker ps -f "name=registry" -q) ]]; then
         docker run -d \
         --rm \
             --name registry \
             --network registry-network \
-            -p 127.0.0.1:5000:5000 \
+            -p 127.0.0.1:9092:9092 \
             registry:2.7
     fi
 fi
@@ -122,7 +123,6 @@ if [[ -n $platform ]]; then
 else
     com="docker buildx bake $@"
 fi
-
 echo $com
 eval $com
 
@@ -135,13 +135,10 @@ if [[ $local -eq 1 ]]; then
     tags=($(eval "$com --print" 2> /dev/null | jq -r '.target[].tags[] | split("/")[-1]' | jq --raw-input | jq -r --slurp 'join(" ")'))
     for tag in "${tags[@]}"; do
         echo "Pulling tag ($tag) from $REGISTRY (platform=$(uname -m))"
-        com="docker pull localhost:5000/$tag"
+        com="docker pull localhost:9092/$tag"
         echo $com
         eval $com
-        com="docker image tag localhost:5000/$tag cmucal/$tag"
-        echo $com
-        eval $com
-        com="docker image tag localhost:5000/$tag ${prefix}__$tag"
+        com="docker image tag localhost:9092/$tag cmucal/$tag"
         echo $com
         eval $com
     done
