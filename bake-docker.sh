@@ -31,6 +31,7 @@ function help {
     echo "Usage: $0 [-l] [-P <prefix>] [-p <platform>]"
     echo ""
     echo "-h                    show this help"
+    echo "-d                    build only for the host machine platform"
     echo "-l                    build using local registry"
     echo "-p <platform>         specify platform"
     echo "                      build linux/arm64 and linux/amd64 if not specified"
@@ -38,15 +39,22 @@ function help {
 }
 
 platform=
-prefix=cabot-base
+prefix=cabot
 local=0
 
-while getopts "hlp:P:" arg; do
+while getopts "hdlp:P:" arg; do
     case $arg in
     h)
         help
         exit
         ;;
+    d)
+	if [[ $(uname -m) = "x86_64" ]]; then
+            platform="linux/amd64"
+	elif [[ $(uname -m) = "aarch64" ]]; then
+            platform="linux/arm64"
+	fi
+	;;
     l)
         local=1
         ;;
@@ -124,11 +132,17 @@ docker buildx use default
 # copy images from local registry
 # this can override image tag
 if [[ $local -eq 1 ]]; then
-    tags=($(eval "$com --print" 2> /dev/null | jq -r '.target[].tags[] | split(":")[-1]' | jq --raw-input | jq -r --slurp 'join(" ")'))
+    tags=($(eval "$com --print" 2> /dev/null | jq -r '.target[].tags[] | split("/")[-1]' | jq --raw-input | jq -r --slurp 'join(" ")'))
     for tag in "${tags[@]}"; do
         echo "Pulling tag ($tag) from $REGISTRY (platform=$(uname -m))"
-        docker pull localhost:5000/cabot-base:$tag
-        echo "put tag"
-        docker image tag localhost:5000/cabot-base:$tag cmucal/cabot-base:$tag
+        com="docker pull localhost:5000/$tag"
+        echo $com
+        eval $com
+        com="docker image tag localhost:5000/$tag cmucal/$tag"
+        echo $com
+        eval $com
+        com="docker image tag localhost:5000/$tag ${prefix}__$tag"
+        echo $com
+        eval $com
     done
 fi
