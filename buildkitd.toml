@@ -1,3 +1,6 @@
-[registry."registry:5000"]
+[registry."registry:9092"]
 http = true
 insecure = true
+
+[worker.oci]
+  max-parallelism = 1
