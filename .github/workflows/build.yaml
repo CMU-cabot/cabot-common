@@ -1,11 +1,17 @@
 name: Test Building Docker Image and Workspace
 
 on:
-  push:
-    branches: [ daisukes/docker-buildx-bake-test ]
-
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+    secrets:
+      dockerhub-token:
+        required: true
+    
 jobs:
-  test_build:
+  reusable_workflow_job:
     runs-on: ubuntu-20.04
     steps:
     - name: Maximize build space
@@ -29,5 +35,5 @@ jobs:
     - name: Buildx bake
       shell: bash
       run:  |
-        docker login -u daisukesato80 -p "${{ secrets.DOCKERHUB_TOKEN }}"
-        ./bake-docker.sh -P cabot-navigation
+        docker login -u daisukesato80 -p "${{ secrets.dockerhub-token }}"
+        ./bake-docker.sh -p ${{ inputs.platform }}

@@ -1,0 +1,20 @@
+name: Test Building Docker Image and Workspace
+
+on:
+  push:
+    branches: [ daisukes/docker-buildx-bake-test ]
+
+jobs:
+  build-amd64:
+    uses: cmu-cabot/cabot-common/.github/workflows/build.yaml@daisukes/docker-buildx-bake-test
+    with:
+      platform: linux/amd64
+    secrets:
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-arm64:
+    uses: cmu-cabot/cabot-common/.github/workflows/build.yaml@daisukes/docker-buildx-bake-test
+    with:
+      platform: linux/arm64
+    secrets:
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
