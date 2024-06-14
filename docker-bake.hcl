@@ -35,6 +35,8 @@ target "base" {
   dockerfile-inline = <<EOF
 FROM --platform=linux/amd64 ubuntu:jammy as build-amd64
 FROM --platform=linux/arm64 nvcr.io/nvidia/l4t-base:r36.2.0 as build-arm64
+RUN sed -i.bak -r 's!http://ports.ubuntu.com/ubuntu-ports/!https://mirror.kumi.systems/ubuntu-ports/!' /etc/apt/sources.list && \
+    cat /etc/apt/sources.list
 FROM build-$TARGETARCH
 EOF
   platforms  = "${PLATFORMS}"
