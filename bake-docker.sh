@@ -108,10 +108,13 @@ done < <(find docker/docker_images/ -wholename */$ROS_DISTRO/*/Dockerfile)
 
 # bake
 if [[ -n $platform ]]; then
-    docker buildx bake --set *.platform=$platform
+    com="docker buildx bake --set *.platform=\"$platform\" $@"
 else
-    docker buildx bake
+    com="docker buildx bake $@"
 fi
+
+echo $com
+eval $com
 
 # reset buildx builder to default
 docker buildx use default
@@ -119,19 +122,11 @@ docker buildx use default
 # copy images from local registry
 # this can override image tag
 if [[ $local -eq 1 ]]; then
-　  tags=(
-        "base"
-        "${ROS_DISTRO}-core"
-        "${ROS_DISTRO}-base"
-        "${ROS_DISTRO}-desktop"
-        "${ROS_DISTRO}-base-custom"
-        "${ROS_DISTRO}-base-custom-mesa"
-        "${ROS_DISTRO}-desktop-custom"
-        "${ROS_DISTRO}-desktop-custom-mesa"
-    )
+    tags=($(eval "$com --print" 2> /dev/null | jq -r '.target[].tags[] | split(":")[-1]' | jq --raw-input | jq -r --slurp 'join(" ")'))
     for tag in "${tags[@]}"; do
-        echo "Processing tag: $tag"
+        echo "Pulling tag ($tag) from $REGISTRY (platform=$(uname -m))"
         docker pull localhost:5000/cabot-base:$tag
+        echo "put tag"
         docker image tag localhost:5000/cabot-base:$tag cmucal/cabot-base:$tag
     done
 fi
