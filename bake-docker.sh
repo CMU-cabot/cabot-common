@@ -28,27 +28,30 @@
 #   - It is also advisable to specify the platform (-p) in this case.
 
 function help {
-    echo "Usage: $0 [-l] [-P <prefix>] [-p <platform>]"
+    echo "Usage: $0 [-i] [-l] [-b <base_name>] [-P <platform>]"
     echo ""
     echo "-h                    show this help"
-    echo "-d                    debug - shorthand for -l and -p with host platform"
+    echo "-b <base_name>        bake with base_name"
+    echo "-i                    image build for debug - shorthand for -l and -P with host platform"
     echo "-l                    build using local registry"
-    echo "-p <platform>         specify platform"
+    echo "-P <platform>         specify platform"
     echo "                      build linux/arm64 and linux/amd64 if not specified"
-    echo "-P <prefix>           prebuild with prefix (default=cabot-base)"
 }
 
 platform=
-prefix=cabot
+base_name=cabot-base
 local=0
 
-while getopts "hdlp:P:" arg; do
+while getopts "hb:ilP:" arg; do
     case $arg in
     h)
         help
         exit
         ;;
-    d)
+    b)
+        base_name=${OPTARG}
+        ;;
+    i)
         if [[ $(uname -m) = "x86_64" ]]; then
             platform="linux/amd64"
         elif [[ $(uname -m) = "aarch64" ]]; then
@@ -59,17 +62,15 @@ while getopts "hdlp:P:" arg; do
     l)
         local=1
         ;;
-    p)
-        platform=${OPTARG}
-        ;;
     P)
-        prefix=${OPTARG}
+        platform=${OPTARG}
         ;;
     esac
 done
 shift $((OPTIND-1))
 
-if [[ -z $prefix ]]; then
+
+if [[ -z $base_name ]]; then
     help
     exit 1
 fi
@@ -118,6 +119,7 @@ if [[ -e ./docker/docker_images ]]; then
 fi
 
 # bake
+export BASE_IMAGE=$base_name
 if [[ -n $platform ]]; then
     com="docker buildx bake --set *.platform=\"$platform\" $@"
 else
