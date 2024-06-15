@@ -12,9 +12,18 @@ jobs:
     secrets:
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  build-arm64:
+  build-arm64-desktop:
     uses: cmu-cabot/cabot-common/.github/workflows/build.yaml@daisukes/docker-buildx-bake-test
     with:
       platform: linux/arm64
+      target: base ros-core ros-base ros-desktop ros-desktop-custom ros-desktop-custom-mesa
+    secrets:
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-arm64-base:
+    uses: cmu-cabot/cabot-common/.github/workflows/build.yaml@daisukes/docker-buildx-bake-test
+    with:
+      platform: linux/arm64
+      target: base ros-core ros-base ros-base-custom ros-base-custom-mesa
     secrets:
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
