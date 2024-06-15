@@ -36,4 +36,4 @@ jobs:
       shell: bash
       run:  |
         docker login -u daisukesato80 -p "${{ secrets.dockerhub-token }}"
-        ./bake-docker.sh -p ${{ inputs.platform }}
+        ./bake-docker.sh -P ${{ inputs.platform }}
