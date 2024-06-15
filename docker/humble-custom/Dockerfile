@@ -56,7 +56,7 @@ WORKDIR $CUSTOM_DIR
 RUN apt update && rosdep update && rosdep install --from-paths src --ignore-src --rosdistro=${ROS_DISTRO} -y --skip-keys "xacro librealsense2"
 
 RUN . /opt/ros/humble/setup.sh && \
-	colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release  # --executor sequential
+	colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --executor sequential
 
 FROM base as build
 
