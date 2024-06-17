@@ -3,9 +3,6 @@ name: Test Building Docker Image and Workspace
 on:
   workflow_call:
     inputs:
-      platform:
-        required: true
-        type: string
       target:
         required: false
         default: ""
@@ -40,4 +37,4 @@ jobs:
       shell: bash
       run:  |
         docker login -u daisukesato80 -p "${{ secrets.dockerhub-token }}"
-        ./bake-docker.sh -P ${{ inputs.platform }} ${{ inputs.target }}
+        ./bake-docker.sh ${{ inputs.target }}
