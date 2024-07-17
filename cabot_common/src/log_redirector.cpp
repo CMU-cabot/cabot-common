@@ -30,8 +30,8 @@ class LogRedirectorNode : public rclcpp::Node
 public:
   explicit LogRedirectorNode(const rclcpp::NodeOptions & options)
   : rclcpp::Node("log_redirector",
-                 rclcpp::NodeOptions(options).enable_rosout(false)  // disable publishing to /rosout topic
-                 )
+      rclcpp::NodeOptions(options).enable_rosout(false)  // disable publishing to /rosout topic
+  )
   {
     RCLCPP_INFO(get_logger(), "log_redirector constructor");
     target_node_ = declare_parameter("target_node", "");
@@ -40,20 +40,19 @@ public:
 
   void rosoutCallback(const rcl_interfaces::msg::Log::SharedPtr input)
   {
-    if (input->name == target_node_){
-      if (input->level == rcl_interfaces::msg::Log::DEBUG){
+    if (input->name == target_node_) {
+      if (input->level == rcl_interfaces::msg::Log::DEBUG) {
         RCLCPP_DEBUG(get_logger(), "[%s]: %s", input->name.c_str(), input->msg.c_str());
-      } else if (input->level == rcl_interfaces::msg::Log::INFO){
+      } else if (input->level == rcl_interfaces::msg::Log::INFO) {
         RCLCPP_INFO(get_logger(), "[%s]: %s", input->name.c_str(), input->msg.c_str());
-      } else if (input->level == rcl_interfaces::msg::Log::WARN){
+      } else if (input->level == rcl_interfaces::msg::Log::WARN) {
         RCLCPP_WARN(get_logger(), "[%s]: %s", input->name.c_str(), input->msg.c_str());
-      } else if (input->level == rcl_interfaces::msg::Log::ERROR){
+      } else if (input->level == rcl_interfaces::msg::Log::ERROR) {
         RCLCPP_ERROR(get_logger(), "[%s]: %s", input->name.c_str(), input->msg.c_str());
-      } else if (input->level == rcl_interfaces::msg::Log::FATAL){
+      } else if (input->level == rcl_interfaces::msg::Log::FATAL) {
         RCLCPP_FATAL(get_logger(), "[%s]: %s", input->name.c_str(), input->msg.c_str());
       }
     }
-
   }
 
 private:
@@ -62,8 +61,8 @@ private:
 };  // class LogRedirectorNode
 
 }  // namespace CaBot
-//#include <rclcpp_components/register_node_macro.hpp>
-//RCLCPP_COMPONENTS_REGISTER_NODE(CaBot::LogRedirectorNode)
+// #include <rclcpp_components/register_node_macro.hpp>
+// RCLCPP_COMPONENTS_REGISTER_NODE(CaBot::LogRedirectorNode)
 
 int main(int argc, char * argv[])
 {
