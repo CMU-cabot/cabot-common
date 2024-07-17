@@ -82,6 +82,17 @@ rclcpp_components_register_node(
   EXECUTABLE lookup_transform_service_node
 )
 
+# log redirector
+add_executable(log_redirector_node
+  src/log_redirector.cpp
+)
+
+ament_target_dependencies(log_redirector_node
+  rclcpp
+  rclcpp_components
+  rcl_interfaces
+)
+
 install(PROGRAMS
   scripts/footprint_publisher.py
   scripts/map_loader.py
@@ -93,6 +104,7 @@ install(TARGETS
   footprint_publisher
   lookup_transform_service
   people_vis_node
+  log_redirector_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
