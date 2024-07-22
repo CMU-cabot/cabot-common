@@ -96,7 +96,7 @@ function build_image {
                         # https://github.com/NVIDIA/nvidia-container-toolkit/issues/221
                         export DOCKER_BUILDKIT=0
 
-                        from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-open3d
+                        from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-mmdeploy-open3d
                         docker compose -p ${prefix_} -f $dcfile build \
                             --build-arg PREFIX=$prefix_ \
                             --build-arg FROM_IMAGE=$from_image \
@@ -106,7 +106,7 @@ function build_image {
                             $service
                     elif [ $arch_ = "x86_64" ] && [[ $service != *jetson* ]]; then
                         if [ $service != "people-nuc" ]; then
-                            from_image=${prefix_}__jammy-cuda11.7.1-cudnn8-devel-${camera_target}-humble-custom-opencv-open3d-mesa
+                            from_image=${prefix_}__jammy-cuda11.8.0-cudnn8-devel-${camera_target}-humble-custom-opencv-mmdeploy-open3d-mesa
                         else
                             from_image=${prefix_}__jammy-humble-custom-mesa
                         fi
