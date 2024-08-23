@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import rosbag2_py
+import rclpy.duration
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 import yaml
@@ -53,7 +54,7 @@ class BagReader:
         for info in self.info.topics_with_message_count:
             self.message_counts[info.topic_metadata.name] = info.message_count
         self.type_map = {self.topic_types[i].name: self.topic_types[i].type for i in range(len(self.topic_types))}
-        self.start_time = self.info.starting_time.timestamp()
+        self.start_time = self.info.starting_time.nanoseconds/1e9;
         self.start = 0
         self.duration = 9999999999
 
