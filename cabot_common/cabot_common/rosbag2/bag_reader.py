@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 import rosbag2_py
-import rclpy.duration
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
 import yaml
