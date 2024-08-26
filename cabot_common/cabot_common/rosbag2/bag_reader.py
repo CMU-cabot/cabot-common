@@ -54,7 +54,10 @@ class BagReader:
         for info in self.info.topics_with_message_count:
             self.message_counts[info.topic_metadata.name] = info.message_count
         self.type_map = {self.topic_types[i].name: self.topic_types[i].type for i in range(len(self.topic_types))}
-        self.start_time = self.info.starting_time.nanoseconds/1e9;
+        if hasattr(self.info.starting_time, "nanoseconds"):
+            self.start_time = self.info.starting_time.nanoseconds/1e9
+        else:   # back compatibility for galactic
+            self.start_time = self.info.starting_time.timestamp()
         self.start = 0
         self.duration = 9999999999
 
