@@ -80,6 +80,7 @@ def check_update():
         if cli.wait_for_service(timeout_sec=10.0):
             g_node.get_logger().info(server + ' service is ready')
             future = cli.call_async(req)
+
             def done_callback(future):
                 global needs_update
                 if future.result().result != LoadMap.Response.RESULT_SUCCESS:
