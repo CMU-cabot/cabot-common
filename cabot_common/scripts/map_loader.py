@@ -23,6 +23,7 @@ import os.path
 import rclpy
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
 import sys
+import traceback
 from ament_index_python.packages import get_package_share_directory
 from std_msgs.msg import String
 from nav2_msgs.srv import LoadMap
@@ -78,7 +79,13 @@ def check_update():
 
         if cli.wait_for_service(timeout_sec=10.0):
             g_node.get_logger().info(server + ' service is ready')
-            cli.call_async(req)
+            future = cli.call_async(req)
+            def done_callback(future):
+                global needs_update
+                if future.result().result != LoadMap.Response.RESULT_SUCCESS:
+                    g_node.get_logger().error('LoadMap request fails. Try again...')
+                    needs_update = True
+            future.add_done_callback(done_callback)
         else:
             error_message = server + ' service is not available'
             g_node.get_logger().info(server + ' service is not available')
@@ -121,6 +128,7 @@ def main(args=None):
     try:
         rclpy.spin(g_node)
     except:  # noqa: E722
+        g_node.get_logger().error(traceback.format_exc())
         pass
 
     # Destroy the node explicitly
