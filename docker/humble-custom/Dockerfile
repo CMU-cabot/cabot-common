@@ -33,8 +33,6 @@ RUN apt update && \
     ros-$ROS_DISTRO-diagnostic-updater \
     ros-$ROS_DISTRO-osrf-testing-tools-cpp \
     ros-$ROS_DISTRO-test-msgs \
-    ros-$ROS_DISTRO-velodyne \
-    ros-$ROS_DISTRO-velodyne-simulator \
     && \
     rm -rf /var/lib/apt/lists/*
 

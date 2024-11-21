@@ -1,4 +1,9 @@
 repositories:
+  docker/humble-custom/velodyne:
+    # not distributed
+    type: git
+    url: https://github.com/ros-drivers/velodyne.git
+    version: ros2
   docker/humble-custom/HesaiLidar_General_ros:
     # bugfix for a library installation issue
     type: git
@@ -34,6 +39,11 @@ repositories:
     type: git
     url: https://github.com/wg-perception/people.git
     version: ros2
+  docker/humble-custom/velodyne_simulator:
+    # not distributed
+    type: git
+    url: https://github.com/ToyotaResearchInstitute/velodyne_simulator
+    version: dashing-devel
   docker/humble-custom/gazebo_ros_pkgs:
     # customized for pacakge path resolving
     type: git
