@@ -127,6 +127,10 @@ else
 fi
 echo $com
 eval $com
+if [[ $? -ne 0 ]]; then
+    echo "failed to build image"
+    exit 1
+fi
 
 # reset buildx builder to default
 docker buildx use default
