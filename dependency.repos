@@ -5,10 +5,15 @@ repositories:
     url: https://github.com/ros-drivers/velodyne.git
     version: ros2
   docker/humble-custom/HesaiLidar_General_ros:
+    # legacy hesai driver
     # bugfix for a library installation issue
     type: git
     url: https://github.com/cmu-cabot/HesaiLidar_General_ros
     version: ros2-humble
+  docker/humble-custom/HesaiLidar_ROS_2.0:
+    type: git
+    url: https://github.com/CMU-cabot/HesaiLidar_ROS_2.0
+    version: cabot
   docker/humble-custom/Lslidar_ROS2_driver:
     type: git
     url: https://github.com/Lslidar/Lslidar_ROS2_driver.git
