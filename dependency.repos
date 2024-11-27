@@ -14,6 +14,12 @@ repositories:
     type: git
     url: https://github.com/CMU-cabot/HesaiLidar_ROS_2.0
     version: cabot
+  docker/humble-custom/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0:
+    # submodule of HesaiLidar_ROS_2.0
+    # TODO: use vcs import < dependency.repos --recursive if the number of submodules becomes large
+    type: git
+    url: https://github.com/CMU-cabot/HesaiLidar_SDK_2.0
+    version: cabot
   docker/humble-custom/Lslidar_ROS2_driver:
     type: git
     url: https://github.com/Lslidar/Lslidar_ROS2_driver.git
