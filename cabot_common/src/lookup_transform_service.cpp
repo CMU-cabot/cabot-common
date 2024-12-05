@@ -24,6 +24,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 #include "cabot_msgs/srv/lookup_transform.hpp"
+#include <std_srvs/srv/trigger.hpp>
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -40,6 +41,9 @@ public:
     service_ = this->create_service<cabot_msgs::srv::LookupTransform>(
       "lookup_transform",
       std::bind(&LookupTransformServiceNode::lookupTransform, this, std::placeholders::_1, std::placeholders::_2));
+    clear_buffer_service_ = this->create_service<std_srvs::srv::Trigger>(
+      "clear_transform_buffer",
+      std::bind(&LookupTransformServiceNode::clearTransformBuffer, this, std::placeholders::_1, std::placeholders::_2));
     RCLCPP_INFO(rclcpp::get_logger("lookup_transform"), "Ready to lookup transform");
   }
 
@@ -70,10 +74,19 @@ public:
     }
   }
 
+  void clearTransformBuffer(
+    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  {
+    buffer_.clear();
+    response->success = true;
+  }
+
 private:
   tf2_ros::Buffer buffer_;
   tf2_ros::TransformListener listener_;
   rclcpp::Service<cabot_msgs::srv::LookupTransform>::SharedPtr service_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr clear_buffer_service_;
 };  // class LookupTransformServiceNode
 
 }  // namespace CaBot
