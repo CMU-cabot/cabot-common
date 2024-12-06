@@ -15,6 +15,7 @@ find_package(people_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -70,6 +71,7 @@ add_library(lookup_transform_service SHARED
 ament_target_dependencies(lookup_transform_service
   cabot_msgs
   geometry_msgs
+  std_srvs
   tf2_geometry_msgs
   tf2_ros
   rclcpp
