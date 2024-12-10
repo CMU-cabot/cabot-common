@@ -73,6 +73,7 @@ public:
     this->declare_parameter("footprint_small", 0.40);
     this->declare_parameter("footprint_links", std::vector<std::string>{"base_footprint"});
     this->declare_parameter("offset_links", std::vector<std::string>{"base_control_shift"});
+    this->declare_parameter("offset_sign", +1.0);
     this->declare_parameter("offset_normal", 0.25);
     this->declare_parameter("offset_smallest", 0.15);
     this->declare_parameter("offset_small", 0.20);
@@ -161,6 +162,7 @@ private:
   sensor_msgs::msg::JointState get_offset_joint_state(Mode mode)
   {
     sensor_msgs::msg::JointState t;
+    auto offset_sign = this->get_parameter("offset_sign").get_value<double>();
     double offset = 0;
     if (mode == Mode::NORMAL) {
       offset = this->get_parameter("offset_normal").get_value<double>();
@@ -172,7 +174,7 @@ private:
 
     t.header.stamp = this->get_clock()->now();
     t.name.push_back("base_joint");
-    t.position.push_back(offset);
+    t.position.push_back(offset_sign * offset);
     return t;
   }
 

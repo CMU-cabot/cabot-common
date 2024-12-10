@@ -146,28 +146,35 @@ class ClickEvent(BaseEvent):
 class HoldDownEvent(BaseEvent):
     TYPE = "holddown"
 
-    def __init__(self, type=None, holddown=0):
+    def __init__(self, type=None, holddown=0, duration=0):
         type = type if type is not None else HoldDownEvent.TYPE
         super(HoldDownEvent, self).__init__(type=type)
         self._holddown = holddown
+        self._duration = duration
 
     def __eq__(self, other):
         return self.type == other.type \
-            and self.holddown == other.holddown
+            and self.holddown == other.holddown \
+            and self.duration == other.duration
 
     @property
     def holddown(self):
         return self._holddown
 
+    @property
+    def duration(self):
+        return self._duration
+
     def __str__(self):
-        return "%s_%d" % (self.type, self.holddown)
+        return "%s_%d_%d" % (self.type, self.holddown, self.duration)
 
     @classmethod
     def _parse(cls, text):
         if text.startswith(cls.TYPE):
             items = text.split("_")
             holddown = int(items[1])
-            return cls(holddown=holddown)
+            duration = int(items[2])
+            return cls(holddown=holddown, duration=duration)
         return None
 
 
