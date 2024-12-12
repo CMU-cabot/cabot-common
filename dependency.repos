@@ -5,10 +5,37 @@ repositories:
     url: https://github.com/ros-drivers/velodyne.git
     version: ros2
   docker/humble-custom/HesaiLidar_General_ros:
+    # legacy hesai driver
     # bugfix for a library installation issue
     type: git
     url: https://github.com/cmu-cabot/HesaiLidar_General_ros
     version: ros2-humble
+  docker/humble-custom/HesaiLidar_ROS_2.0:
+    type: git
+    url: https://github.com/CMU-cabot/HesaiLidar_ROS_2.0
+    version: cabot
+  docker/humble-custom/HesaiLidar_ROS_2.0/src/driver/HesaiLidar_SDK_2.0:
+    # submodule of HesaiLidar_ROS_2.0
+    # TODO: use vcs import < dependency.repos --recursive if the number of submodules becomes large
+    type: git
+    url: https://github.com/CMU-cabot/HesaiLidar_SDK_2.0
+    version: cabot
+  docker/humble-custom/Lslidar_ROS2_driver:
+    type: git
+    url: https://github.com/Lslidar/Lslidar_ROS2_driver.git
+    version: C32_V4.0
+  docker/humble-custom/rslidar_sdk:
+    type: git
+    url: https://github.com/RoboSense-LiDAR/rslidar_sdk.git
+    version: 11c89b8683e4ab0e0aaf72fd37242555a4e5fc87
+  docker/humble-custom/rslidar_sdk/src/rs_driver:
+    type: git
+    url: https://github.com/RoboSense-LiDAR/rs_driver.git
+    version: ba07ba49565c8f1df745c8effaf64f39ac83a0ef
+  docker/humble-custom/rslidar_msg:
+    type: git
+    url: https://github.com/RoboSense-LiDAR/rslidar_msg.git
+    version: master
   docker/humble-custom/livox_ros2_driver:
     type: git
     url: https://github.com/DroneBase/livox_ros2_driver.git
