@@ -36,7 +36,7 @@ function show_available_services {
     local -n dcfiles_=$1
     declare -A services_dict
     for dcfile in ${dcfiles_[@]}; do
-        services=$(docker compose -f $dcfile config --services 2> /dev/null)
+        services=$(docker compose -f $dcfile --profile build config --services 2> /dev/null)
         for service in ${services[@]}; do
             if [[ ! -v services_dict[$service] ]]; then
                 echo "  $service"
@@ -153,8 +153,7 @@ function build_image {
 function build_workspace {
     local -n dcfiles_=$1
     local -n targets_=$2
-    local -n arch_=$3
-    local -n debug_=$4
+    local -n debug_=$3
     if [[ ! -z $targets_ ]]; then
         # make target dict
         declare -A target_dict
@@ -167,7 +166,7 @@ function build_workspace {
     blue "Building workspaces"
     for dcfile in ${dcfiles_[@]}; do
         blue "Building $dcfile"
-        services=$(docker compose -f $dcfile config --services)
+        services=$(docker compose -f $dcfile --profile build config --services)
         if [[ $? -ne 0 ]]; then
             return 1
         fi
@@ -177,14 +176,10 @@ function build_workspace {
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
                 continue
             fi
-            if [[ $service = people* ]] && { { [ $arch_ = "x86_64" ] && [[ $service = *jetson* ]]; } || { [ $arch_ = "aarch64" ] && [[ $service != *jetson* ]]; } }; then
-                blue "Skip building different architecture workspace of $dcfile, $service"
-                continue
-            fi
             blue "Building workspace of $dcfile, $service debug=$debug_"
 
             # check if volume src dir is already built or not
-            dirs=$(docker compose -f $dcfile config $service | grep target | grep src | cut -d: -f2)
+            dirs=$(docker compose -f $dcfile --profile build config $service | grep target | grep src | cut -d: -f2)
             flag=true
             for dir in ${dirs[@]}; do
                 if [[ ! -v built[$dir] ]]; then
