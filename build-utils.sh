@@ -177,8 +177,12 @@ function build_workspace {
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
                 continue
             fi
+            if [ $arch_ = "x86_64" ] && [ -z `which nvidia-smi` ] && { [ $service = "people" ] || [ $service = "people-framos" ]; }; then
+                blue "Skip building a workspace that requires GPU, $dcfile, $service"
+                continue
+            fi
             if [ $arch_ = "aarch64" ] && [ $service = "people-nuc" ]; then
-                blue "Skip building different architecture workspace of $dcfile, $service"
+                blue "Skip building a workspace for NUC, $dcfile, $service"
                 continue
             fi
             blue "Building workspace of $dcfile, $service debug=$debug_"
