@@ -153,7 +153,8 @@ function build_image {
 function build_workspace {
     local -n dcfiles_=$1
     local -n targets_=$2
-    local -n debug_=$3
+    local -n arch_=$3
+    local -n debug_=$4
     if [[ ! -z $targets_ ]]; then
         # make target dict
         declare -A target_dict
@@ -174,6 +175,10 @@ function build_workspace {
         for service in ${services[@]}; do
             # check if target_dict exists and service is in the target_dict
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
+                continue
+            fi
+            if [ $arch_ = "aarch64" ] && [ $service = "people-nuc" ]; then
+                blue "Skip building different architecture workspace of $dcfile, $service"
                 continue
             fi
             blue "Building workspace of $dcfile, $service debug=$debug_"
