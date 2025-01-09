@@ -75,7 +75,7 @@ public:
   }
 
   void clearTransformBuffer(
-    const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    [[maybe_unused]] const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
     buffer_.clear();
