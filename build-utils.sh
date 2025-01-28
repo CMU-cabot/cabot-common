@@ -36,114 +36,12 @@ function show_available_services {
     local -n dcfiles_=$1
     declare -A services_dict
     for dcfile in ${dcfiles_[@]}; do
-        services=$(docker compose -f $dcfile config --services 2> /dev/null)
+        services=$(docker compose -f $dcfile --profile build config --services 2> /dev/null)
         for service in ${services[@]}; do
             if [[ ! -v services_dict[$service] ]]; then
                 echo "  $service"
             fi
             services_dict[$service]=1
-        done
-    done
-}
-
-function build_image {
-    local -n dcfiles_=$1
-    local -n targets_=$2
-    local -n option_=$3
-    local -n time_zone_=$4
-    local -n uid_=$5
-    local -n prefix_=$6
-    local -n arch_=$7
-    local -n camera_targets_=$8
-
-    if [[ ! -z $targets_ ]]; then
-        # make target dict
-        declare -A target_dict
-        for target in ${targets_[@]}; do
-            target_dict[$target]=1
-        done
-    fi
-    blue "Building images"
-    for dcfile in ${dcfiles_[@]}; do
-        blue "Building $dcfile"
-        services=$(docker compose -f $dcfile config --services)
-        if [[ $? -ne 0 ]]; then
-            return 1
-        fi
-        services=$(echo ${services[@]} | grep -v base)
-        for service in ${services[@]}; do
-            # check if target_dict exists and service is in the target_dict
-            if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
-                continue
-            fi
-            if [[ $service = people* ]] && { { [ $arch_ = "x86_64" ] && [[ $service = *jetson* ]]; } || { [ $arch_ = "aarch64" ] && [[ $service != *jetson* ]]; } }; then
-                blue "Skip building different architecture image of $dcfile, $service"
-                continue
-            fi
-            blue "Building image of $dcfile, $service"
-            if [[ $service = people* ]]; then
-                for camera_target in $camera_targets; do
-                    if [ $camera_target != "realsense" ] && [ $camera_target != "framos" ]; then
-                        red "invalid camera target $camera_target"
-                        return 1
-                    fi
-                    if [ $camera_target != "framos" ] && [[ $service = *framos* ]]; then
-                        blue "Skip building different camera image of $dcfile, $service"
-                        continue
-                    fi
-                    if [ $arch_ = "aarch64" ] && [[ $service = *jetson* ]]; then
-                        # disable BuildKit to avoid build error for NVIDIA container
-                        # https://github.com/NVIDIA/nvidia-container-toolkit/issues/221
-                        export DOCKER_BUILDKIT=0
-
-                        from_image=${prefix_}_l4t-${camera_target}-opencv-humble-custom-mmdeploy-open3d
-                        docker compose -p ${prefix_} -f $dcfile build \
-                            --build-arg PREFIX=$prefix_ \
-                            --build-arg FROM_IMAGE=$from_image \
-                            --build-arg UID=$uid_ \
-                            --build-arg TZ=$time_zone_ \
-                            $option_ \
-                            $service
-                    elif [ $arch_ = "x86_64" ] && [[ $service != *jetson* ]]; then
-                        if [ $service != "people-nuc" ]; then
-                            from_image=${prefix_}__jammy-cuda11.8.0-cudnn8-devel-${camera_target}-humble-custom-opencv-mmdeploy-open3d-mesa
-                        else
-                            from_image=${prefix_}__jammy-humble-custom-mesa
-                        fi
-                        docker compose -p ${prefix_} -f $dcfile build \
-                            --build-arg PREFIX=$prefix_ \
-                            --build-arg FROM_IMAGE=$from_image \
-                            --build-arg UID=$uid_ \
-                            --build-arg TZ=$time_zone_ \
-                            $option_ \
-                            $service
-                    fi
-                    if [[ $? -ne 0 ]]; then
-                        return 1
-                    fi
-                done
-            else
-                if [ $arch_ = "aarch64" ]; then
-                    from_image=${prefix_}__jammy-humble-custom
-                    docker compose -p ${prefix_} -f $dcfile build \
-                        --build-arg PREFIX=$prefix_ \
-                        --build-arg FROM_IMAGE=$from_image \
-                        --build-arg UID=$uid_ \
-                        --build-arg TZ=$time_zone_ \
-                        $option_ \
-                        $service
-                else
-                    docker compose -p ${prefix_} -f $dcfile build \
-                        --build-arg PREFIX=$prefix_ \
-                        --build-arg UID=$uid_ \
-                        --build-arg TZ=$time_zone_ \
-                        $option_ \
-                        $service
-                fi
-                if [[ $? -ne 0 ]]; then
-                    return 1
-                fi
-            fi
         done
     done
 }
@@ -165,7 +63,7 @@ function build_workspace {
     blue "Building workspaces"
     for dcfile in ${dcfiles_[@]}; do
         blue "Building $dcfile"
-        services=$(docker compose -f $dcfile config --services)
+        services=$(docker compose -f $dcfile --profile build config --services)
         if [[ $? -ne 0 ]]; then
             return 1
         fi
@@ -175,14 +73,18 @@ function build_workspace {
             if declare -p target_dict &> /dev/null && [[ ! -v target_dict[$service] ]]; then
                 continue
             fi
-            if [[ $service = people* ]] && { { [ $arch_ = "x86_64" ] && [[ $service = *jetson* ]]; } || { [ $arch_ = "aarch64" ] && [[ $service != *jetson* ]]; } }; then
-                blue "Skip building different architecture workspace of $dcfile, $service"
+            if [ $arch_ = "x86_64" ] && [ -z `which nvidia-smi` ] && { [ $service = "people" ] || [ $service = "people-framos" ]; }; then
+                blue "Skip building a workspace that requires GPU, $dcfile, $service"
+                continue
+            fi
+            if [ $arch_ = "aarch64" ] && [ $service = "people-nuc" ]; then
+                blue "Skip building a workspace for NUC, $dcfile, $service"
                 continue
             fi
             blue "Building workspace of $dcfile, $service debug=$debug_"
 
             # check if volume src dir is already built or not
-            dirs=$(docker compose -f $dcfile config $service | grep target | grep src | cut -d: -f2)
+            dirs=$(docker compose -f $dcfile --profile build config $service | grep target | grep src | cut -d: -f2)
             flag=true
             for dir in ${dirs[@]}; do
                 if [[ ! -v built[$dir] ]]; then

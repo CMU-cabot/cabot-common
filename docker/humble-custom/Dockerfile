@@ -4,21 +4,28 @@ FROM $FROM_IMAGE as base
 
 ENV ROS_DISTRO=humble
 
-RUN apt update && apt install -q -y --no-install-recommends \
-    build-essential \
-    git \
-    python3-colcon-common-extensions \
-    python3-colcon-mixin \
-    python3-pip \
-    python3-rosdep \
-    python3-vcstool \
-    && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rosdep init
+ARG TARGETARCH
 
-RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
-    colcon mixin update default
+# downgrade libopencv-dev for ROS2
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        apt update && apt install -q -y --no-install-recommends --allow-downgrades \
+        libopencv-dev=4.5.4+dfsg-9ubuntu4 \
+        && \
+        apt clean && \
+        rm -rf /var/lib/apt/lists/* \
+        ; \
+    fi
+
+# add gazebo repository for arm
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        apt update && apt install -q -y --no-install-recommends \
+        software-properties-common \
+        && \
+        apt clean && \
+        rm -rf /var/lib/apt/lists/* && \
+	add-apt-repository ppa:openrobotics/gazebo11-non-amd64 \
+        ; \
+    fi
 
 RUN apt update && \
     apt install -y --no-install-recommends \
@@ -26,6 +33,7 @@ RUN apt update && \
     libaprutil1-dev \
     libasio-dev \
     libpcap-dev \
+    python3-pip \
     ros-$ROS_DISTRO-camera-info-manager \
     ros-$ROS_DISTRO-cyclonedds \
     ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
@@ -45,10 +53,10 @@ COPY . $CUSTOM_DIR/src
 
 WORKDIR $CUSTOM_DIR
 
-RUN rosdep update && rosdep install --from-paths src --ignore-src --rosdistro=${ROS_DISTRO} -y --skip-keys "xacro librealsense2 message_runtime rslidar_input rslidar_msg"
+RUN apt update && rosdep update && rosdep install --from-paths src --ignore-src --rosdistro=${ROS_DISTRO} -y --skip-keys "xacro librealsense2 message_runtime rslidar_input rslidar_msg"
 
 RUN . /opt/ros/humble/setup.sh && \
-	colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release  # --executor sequential
+	colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --executor sequential
 
 FROM base as build
 
