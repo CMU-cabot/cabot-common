@@ -74,6 +74,16 @@ repositories:
     type: git
     url: https://github.com/ros-perception/perception_pcl
     version: 2.6.2
+  # temporal fix until PR is merged and released
+  # https://github.com/ros/bond_core/pull/97
+  docker/humble-custom/bond_core:
+    type: git
+    url: https://github.com/ros/bond_core.git
+    version: ros2
+  docker/humble-custom/navigation2:
+    type: git
+    url: https://github.com/ros-planning/navigation2
+    version: humble
 
   docker/opengl:
     type: git
