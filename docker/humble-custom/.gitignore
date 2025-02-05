@@ -1,5 +1,0 @@
-*
-!.gitignore
-!Dockerfile
-!Dockerfile.jetson
-!.dockerignore
