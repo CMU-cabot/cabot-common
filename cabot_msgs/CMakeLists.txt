@@ -15,6 +15,7 @@ if(BUILD_TESTING)
 endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  msg/Anchor.msg
   msg/PoseLog.msg
   msg/Log.msg
   msg/StopReason.msg
