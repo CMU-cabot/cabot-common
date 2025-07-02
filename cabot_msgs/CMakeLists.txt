@@ -17,6 +17,7 @@ endif()
 rosidl_generate_interfaces(${PROJECT_NAME}
   msg/Anchor.msg
   msg/PoseLog.msg
+  msg/PoseLog2.msg
   msg/Log.msg
   msg/StopReason.msg
   srv/Speak.srv
