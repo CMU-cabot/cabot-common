@@ -23,7 +23,5 @@ geometry_msgs/Pose pose
 float64 lat
 float64 lng
 float64 global_rotate
-float64 anchor_lat
-float64 anchor_lng
-float64 anchor_rotate
+cabot_msgs/Anchor anchor
 int32 floor
