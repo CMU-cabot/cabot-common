@@ -51,6 +51,7 @@ function build_workspace {
     local -n targets_=$2
     local -n arch_=$3
     local -n debug_=$4
+    local -n sequential_=$5
     if [[ ! -z $targets_ ]]; then
         # make target dict
         declare -A target_dict
@@ -96,11 +97,14 @@ function build_workspace {
                 blue "skip -- already built"
                 continue
             fi
+            build_option=
             if [[ "$debug_" -eq 1 ]]; then
-                docker compose -f $dcfile run --rm $service /launch.sh build -d
-            else
-                docker compose -f $dcfile run --rm $service /launch.sh build
+                build_option+=" -d"
             fi
+            if [[ "$sequential_" -eq 1 ]]; then
+                build_option+=" -s"
+            fi
+            docker compose -f $dcfile run --rm $service /launch.sh build $build_option
             if [[ $? -ne 0 ]]; then
                 return 1
             fi
