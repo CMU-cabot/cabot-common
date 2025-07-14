@@ -82,10 +82,12 @@ def check_update():
             future = cli.call_async(req)
 
             def done_callback(future):
-                global needs_update
+                global needs_update, error_message
                 if future.result().result != LoadMap.Response.RESULT_SUCCESS:
                     g_node.get_logger().error('LoadMap request fails. Try again...')
                     needs_update = True
+                else:
+                    error_message = None
             future.add_done_callback(done_callback)
         else:
             error_message = server + ' service is not available'
