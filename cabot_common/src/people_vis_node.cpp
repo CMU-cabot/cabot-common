@@ -84,7 +84,11 @@ private:
   visualization_msgs::msg::Marker get_point(std::string frame_id, people_msgs::msg::Person & person, float size)
   {
     visualization_msgs::msg::Marker marker;
-    init_marker(frame_id, marker, person, "point", 0.0, 0.0, 1.0, 1.0);
+    if (std::find(person.tags.begin(), person.tags.end(), "stationary") == person.tags.end()) {
+      init_marker(frame_id, marker, person, "point", 1.0, 0.0, 0.0, 1.0);
+    } else {
+      init_marker(frame_id, marker, person, "point", 0.0, 0.0, 1.0, 1.0);
+    }
     marker.type = visualization_msgs::msg::Marker::SPHERE;
     marker.scale.x = size;
     marker.scale.y = size;
