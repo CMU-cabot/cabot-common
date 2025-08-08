@@ -21,6 +21,8 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
+install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch)
+
 add_executable(footprint_publisher
   src/footprint_publisher.cpp
 )
@@ -95,6 +97,18 @@ ament_target_dependencies(log_redirector_node
   rcl_interfaces
 )
 
+# three camera throttle
+add_executable(three_camera_throttle_node
+  src/three_camera_throttle.cpp
+)
+
+ament_target_dependencies(three_camera_throttle_node
+  rclcpp
+  sensor_msgs
+  std_msgs
+  message_filters
+)
+
 install(PROGRAMS
   scripts/footprint_publisher.py
   scripts/map_loader.py
@@ -107,6 +121,7 @@ install(TARGETS
   lookup_transform_service
   people_vis_node
   log_redirector_node
+  three_camera_throttle_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
