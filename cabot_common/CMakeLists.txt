@@ -33,6 +33,18 @@ ament_target_dependencies(footprint_publisher
   diagnostic_updater
 )
 
+add_executable(footprint_publisher2
+  src/footprint_publisher2.cpp
+)
+
+ament_target_dependencies(footprint_publisher2
+  rclcpp
+  geometry_msgs
+  sensor_msgs
+  diagnostic_msgs
+  diagnostic_updater
+)
+
 add_executable(people_vis_node
   src/people_vis_node.cpp
 )
@@ -104,6 +116,7 @@ install(PROGRAMS
 
 install(TARGETS
   footprint_publisher
+  footprint_publisher2
   lookup_transform_service
   people_vis_node
   log_redirector_node
