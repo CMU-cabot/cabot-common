@@ -146,11 +146,12 @@ private:
 
   geometry_msgs::msg::Polygon::SharedPtr polygon_footprint(const std::vector<double> & footprint)
   {
+    auto offset_sign = this->get_parameter("offset_sign").get_value<double>();
     auto polygon = std::make_shared<geometry_msgs::msg::Polygon>();
     for (size_t i = 0; i < footprint.size(); i += 2) {
       geometry_msgs::msg::Point32 p;
       p.x = footprint[i];
-      p.y = footprint[i + 1];
+      p.y = footprint[i + 1] * offset_sign;
       polygon->points.push_back(p);
     }
     return polygon;
