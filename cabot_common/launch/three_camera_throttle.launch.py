@@ -50,7 +50,7 @@ def generate_launch_description():
         DeclareLaunchArgument('output_hz', default_value='1.0'),
         DeclareLaunchArgument('camera1', default_value='/camera1'),
         DeclareLaunchArgument('camera2', default_value='/camera2'),
-        DeclareLaunchArgument('camera2', default_value='/camera3'),
+        DeclareLaunchArgument('camera3', default_value='/camera3'),
 
         SetParameter('use_sim_time', use_sim_time),
 
