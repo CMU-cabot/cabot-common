@@ -19,7 +19,6 @@ find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(topic_tools REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
 install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch)
@@ -110,17 +109,15 @@ ament_target_dependencies(three_camera_throttle_node
   message_filters
 )
 
-# grid throttle
-add_executable(grid_throttle_node
-  src/grid_throttle.cpp
+# grid image throttle
+add_executable(grid_image_throttle_node
+  src/grid_image_throttle.cpp
 )
 
-ament_target_dependencies(grid_throttle_node
+ament_target_dependencies(grid_image_throttle_node
   rclcpp
   sensor_msgs
   std_msgs
-  message_filters
-  topic_tools
 )
 
 
@@ -137,7 +134,7 @@ install(TARGETS
   people_vis_node
   log_redirector_node
   three_camera_throttle_node
-  grid_throttle_node
+  grid_image_throttle_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
