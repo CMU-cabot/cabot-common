@@ -42,9 +42,9 @@ public:
     input_topic_ = declare_parameter<std::string>("input_topic");
     output_topic_ = declare_parameter<std::string>("output_topic", input_topic_ + "_throttle");
     lazy_ = declare_parameter<bool>("lazy", false);
-    msgs_per_sec_ = declare_parameter<double>("msgs_per_sec", 1.0);
-    period_ = rclcpp::Rate(msgs_per_sec_).period();
-    interval_sec_ = 1.0/msgs_per_sec_;
+    throttle_hz_ = declare_parameter<double>("throttle_hz", 1.0);
+    period_ = rclcpp::Rate(throttle_hz_).period();
+    interval_sec_ = 1.0/throttle_hz_;
 
     last_time_ = this->now();
 
@@ -83,7 +83,7 @@ private:
     }
   }
 
-  double msgs_per_sec_;
+  double throttle_hz_;
   double interval_sec_;
   std::chrono::nanoseconds period_;
   rclcpp::Time last_time_;

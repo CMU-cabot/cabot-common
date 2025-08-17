@@ -43,7 +43,7 @@ public:
     compressed_ = declare_parameter<bool>("compressed", false);
     input_topic_ = declare_parameter<std::string>("input_topic");
     output_topic_ = declare_parameter<std::string>("output_topic", input_topic_ + "_throttle");
-    max_sync_interval_ = declare_parameter<double>("max_sync_interval", 0.1);
+    max_sync_interval_ = declare_parameter<double>("max_sync_interval", 0.2);
     throttle_hz_ = declare_parameter<double>("throttle_hz", 1.0);
     interval_sec_ = 1.0/throttle_hz_;
 
@@ -83,17 +83,18 @@ private:
     double last_s = static_cast<double>(last_time_.seconds());
     double grid_last = std::floor(last_s / interval_sec_) * interval_sec_;
 
-    RCLCPP_INFO(get_logger(), "grid_last = %f", grid_last);
-
     if (msg.type() == typeid(CompressedImage::SharedPtr)) {
       CompressedImage::SharedPtr image = std::any_cast<CompressedImage::SharedPtr>(msg);
       rclcpp::Time t_stamp(image->header.stamp);
       double stamp_s = static_cast<double>(t_stamp.seconds());
       double grid_stamp = std::floor(stamp_s / interval_sec_) * interval_sec_;
-      RCLCPP_INFO(get_logger(), "grid_stamp = %f", grid_stamp);
       if (grid_stamp != grid_last){
-        RCLCPP_INFO(get_logger(), "diff (stamp_s - grid_stamp) = %f", stamp_s - grid_stamp);
-        std::static_pointer_cast<rclcpp::Publisher<CompressedImage>>(pub_)->publish(*image);
+        if (stamp_s - grid_stamp < max_sync_interval_){
+          RCLCPP_INFO(get_logger(), "grid_last = %f", grid_last);
+          RCLCPP_INFO(get_logger(), "grid_stamp = %f", grid_stamp);
+          RCLCPP_INFO(get_logger(), "diff (stamp_s - grid_stamp) = %f", stamp_s - grid_stamp);
+          std::static_pointer_cast<rclcpp::Publisher<CompressedImage>>(pub_)->publish(*image);
+        }
         last_time_ = t_stamp;
       }
     } else if (msg.type() == typeid(Image::SharedPtr)) {
@@ -101,10 +102,13 @@ private:
       rclcpp::Time t_stamp(image->header.stamp);
       double stamp_s = static_cast<double>(t_stamp.seconds());
       double grid_stamp = std::floor(stamp_s / interval_sec_) * interval_sec_;
-      RCLCPP_INFO(get_logger(), "grid_stamp = %f", grid_stamp);
       if (grid_stamp != grid_last){
-        RCLCPP_INFO(get_logger(), "diff (stamp_s - grid_stamp) = %f", stamp_s - grid_stamp);
-        std::static_pointer_cast<rclcpp::Publisher<Image>>(pub_)->publish(*image);
+        if (stamp_s - grid_stamp < max_sync_interval_){
+          RCLCPP_INFO(get_logger(), "grid_last = %f", grid_last);
+          RCLCPP_INFO(get_logger(), "grid_stamp = %f", grid_stamp);
+          RCLCPP_INFO(get_logger(), "diff (stamp_s - grid_stamp) = %f", stamp_s - grid_stamp);
+          std::static_pointer_cast<rclcpp::Publisher<Image>>(pub_)->publish(*image);
+        }
         last_time_ = t_stamp;
       }
     }
@@ -113,7 +117,6 @@ private:
 
   rclcpp::PublisherBase::SharedPtr pub_;
   rclcpp::SubscriptionBase::SharedPtr sub_;
-  rclcpp::TimerBase::SharedPtr timer_;
 
   bool compressed_;
   double max_sync_interval_;

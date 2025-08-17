@@ -35,11 +35,14 @@ from cabot_common.launch import AppendLogDirPrefix
 def generate_launch_description():
     output = {'stderr': {'log'}}
     use_sim_time = LaunchConfiguration('use_sim_time')
-    throttle_hz = LaunchConfiguration('throttle_hz')
-    compressed = LaunchConfiguration('compressed')
     camera1 = LaunchConfiguration('camera1')
     camera2 = LaunchConfiguration('camera2')
     camera3 = LaunchConfiguration('camera3')
+    input_topic_name = LaunchConfiguration('input_topic_name')
+    output_topic_name = LaunchConfiguration('output_topic_name')
+    compressed = LaunchConfiguration('compressed')
+    throttle_hz = LaunchConfiguration('throttle_hz')
+    max_sync_interval = LaunchConfiguration('max_sync_interval')
 
     return LaunchDescription([
         # save all log file in the directory where the launch.log file is saved
@@ -48,54 +51,59 @@ def generate_launch_description():
         RegisterEventHandler(OnShutdown(on_shutdown=[AppendLogDirPrefix("cabot_common")])),
 
         DeclareLaunchArgument('use_sim_time', default_value='false'),
-        DeclareLaunchArgument('throttle_hz', default_value='1.0'),
-        DeclareLaunchArgument('compressed', default_value='true'),
         DeclareLaunchArgument('camera1', default_value='/camera1'),
         DeclareLaunchArgument('camera2', default_value='/camera2'),
         DeclareLaunchArgument('camera3', default_value='/camera3'),
+        DeclareLaunchArgument('input_topic_name', default_value='/image_raw/compressed'),
+        DeclareLaunchArgument('output_topic_name', default_value='/image_throttled/compressed'),
+        DeclareLaunchArgument('compressed', default_value='true'),
+        DeclareLaunchArgument('throttle_hz', default_value='1.0'),
+        DeclareLaunchArgument('max_sync_interval', default_value='0.2'),
 
         SetParameter('use_sim_time', use_sim_time),
 
+        # run three grid image throttle nodes
         Node(
             package='cabot_common',
             executable='grid_image_throttle_node',
-            name='grid_image_throttle_node1',
+            name='grid_image_throttle_node_1',
             parameters=[
                     {
                         'throttle_hz': throttle_hz,
+                        'max_sync_interval': max_sync_interval,
                         'compressed': compressed,
-                        'input_topic': [camera1, '/image_raw/compressed'],
-                        'output_topic': [camera1, '/image_throttled/compressed'],
+                        'input_topic': [camera1, input_topic_name],
+                        'output_topic': [camera1, output_topic_name],
                     },
             ],
             output=output,
         ),
-
         Node(
             package='cabot_common',
             executable='grid_image_throttle_node',
-            name='grid_image_throttle_node2',
+            name='grid_image_throttle_node_2',
             parameters=[
                     {
                         'throttle_hz': throttle_hz,
+                        'max_sync_interval': max_sync_interval,
                         'compressed': compressed,
-                        'input_topic': [camera2, '/image_raw/compressed'],
-                        'output_topic': [camera2, '/image_throttled/compressed'],
+                        'input_topic': [camera2, input_topic_name],
+                        'output_topic': [camera2, output_topic_name],
                     },
             ],
             output=output,
         ),
-
         Node(
             package='cabot_common',
             executable='grid_image_throttle_node',
-            name='grid_image_throttle_node3',
+            name='grid_image_throttle_node_3',
             parameters=[
                     {
                         'throttle_hz': throttle_hz,
+                        'max_sync_interval': max_sync_interval,
                         'compressed': compressed,
-                        'input_topic': [camera3, '/image_raw/compressed'],
-                        'output_topic': [camera3, '/image_throttled/compressed'],
+                        'input_topic': [camera3, input_topic_name],
+                        'output_topic': [camera3, output_topic_name],
                     },
             ],
             output=output,
