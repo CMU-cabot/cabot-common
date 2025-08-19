@@ -69,13 +69,13 @@ public:
       "footprint_topics",
       std::vector<std::string>{"/global_costmap/footprint", "/local_costmap/footprint"});
     this->declare_parameter("footprint_normal", std::vector<double>{0, 0.37, -0.27, 0.37, -0.27, -0.37, 0.27, -0.37, 0.27, 0.37});
-    this->declare_parameter("footprint_smallest", std::vector<double>{0, 0.27, -0.27, 0.27, -0.27, -0.27, 0.27, -0.27, 0.27, 0.27});
+    this->declare_parameter("footprint_smallest", std::vector<double>{0, 0.22, -0.27, 0.22, -0.27, -0.22, 0.27, -0.22, 0.27, 0.22});
     this->declare_parameter("footprint_small", std::vector<double>{0, 0.32, -0.27, 0.32, -0.27, -0.32, 0.27, -0.32, 0.27, 0.32});
     this->declare_parameter("footprint_links", std::vector<std::string>{"base_footprint"});
     this->declare_parameter("offset_links", std::vector<std::string>{"base_control_shift"});
     this->declare_parameter("offset_sign", +1.0);
     this->declare_parameter("offset_normal", 0.25);
-    this->declare_parameter("offset_smallest", 0.15);
+    this->declare_parameter("offset_smallest", 0.10);
     this->declare_parameter("offset_small", 0.20);
 
     std::vector<std::string> footprint_topics;
