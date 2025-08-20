@@ -68,14 +68,14 @@ public:
     this->declare_parameter(
       "footprint_topics",
       std::vector<std::string>{"/global_costmap/footprint", "/local_costmap/footprint"});
-    this->declare_parameter("footprint_normal", 0.45);
-    this->declare_parameter("footprint_smallest", 0.20);
-    this->declare_parameter("footprint_small", 0.40);
+    this->declare_parameter("footprint_normal", std::vector<double>{0, 0.37, -0.27, 0.37, -0.27, -0.37, 0.27, -0.37, 0.27, 0.37});
+    this->declare_parameter("footprint_smallest", std::vector<double>{0, 0.22, -0.27, 0.22, -0.27, -0.22, 0.27, -0.22, 0.27, 0.22});
+    this->declare_parameter("footprint_small", std::vector<double>{0, 0.32, -0.27, 0.32, -0.27, -0.32, 0.27, -0.32, 0.27, 0.32});
     this->declare_parameter("footprint_links", std::vector<std::string>{"base_footprint"});
     this->declare_parameter("offset_links", std::vector<std::string>{"base_control_shift"});
     this->declare_parameter("offset_sign", +1.0);
     this->declare_parameter("offset_normal", 0.25);
-    this->declare_parameter("offset_smallest", 0.0);
+    this->declare_parameter("offset_smallest", 0.10);
     this->declare_parameter("offset_small", 0.20);
 
     std::vector<std::string> footprint_topics;
@@ -128,32 +128,30 @@ private:
   {
     sensor_msgs::msg::JointState state;
 
-    double footprint = 0;
+    std::vector<double> footprint;
     if (mode == Mode::NORMAL) {
-      footprint = this->get_parameter("footprint_normal").get_value<double>();
+      footprint = this->get_parameter("footprint_normal").get_value<std::vector<double>>();
     } else if (mode == Mode::SMALLEST) {
-      footprint = this->get_parameter("footprint_smallest").get_value<double>();
+      footprint = this->get_parameter("footprint_smallest").get_value<std::vector<double>>();
     } else if (mode == Mode::SMALL) {
-      footprint = this->get_parameter("footprint_small").get_value<double>();
+      footprint = this->get_parameter("footprint_small").get_value<std::vector<double>>();
     }
-    RCLCPP_INFO(this->get_logger(), "Footprint size=%.2f", footprint);
 
-    if (footprint == 0) {
+    if (footprint.size() == 0) {
       return nullptr;
     }
 
-    return circle_footprint(footprint);
+    return polygon_footprint(footprint);
   }
 
-  geometry_msgs::msg::Polygon::SharedPtr circle_footprint(double radius)
+  geometry_msgs::msg::Polygon::SharedPtr polygon_footprint(const std::vector<double> & footprint)
   {
-    int N = 16;
+    auto offset_sign = this->get_parameter("offset_sign").get_value<double>();
     auto polygon = std::make_shared<geometry_msgs::msg::Polygon>();
-    for (int w = 0; w < N; w++) {
-      double rad = 2 * M_PI * w / N;
+    for (size_t i = 0; i < footprint.size(); i += 2) {
       geometry_msgs::msg::Point32 p;
-      p.x = cos(rad) * radius;
-      p.y = sin(rad) * radius;
+      p.x = footprint[i];
+      p.y = footprint[i + 1] * offset_sign;
       polygon->points.push_back(p);
     }
     return polygon;
