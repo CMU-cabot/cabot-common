@@ -19,7 +19,10 @@ find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+# find_package(topic_tools REQUIRED)
 find_package(visualization_msgs REQUIRED)
+
+install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch)
 
 add_executable(footprint_publisher
   src/footprint_publisher.cpp
@@ -107,6 +110,29 @@ ament_target_dependencies(log_redirector_node
   rcl_interfaces
 )
 
+# grid throttle node is not built by default because it requires an additional dependency (topic_tools)
+# add_executable(grid_throttle_node
+#   src/grid_throttle.cpp
+# )
+
+# ament_target_dependencies(grid_throttle_node
+#   rclcpp
+#   sensor_msgs
+#   std_msgs
+#   topic_tools
+# )
+
+# grid image throttle
+add_executable(grid_image_throttle_node
+  src/grid_image_throttle.cpp
+)
+
+ament_target_dependencies(grid_image_throttle_node
+  rclcpp
+  sensor_msgs
+  std_msgs
+)
+
 install(PROGRAMS
   scripts/footprint_publisher.py
   scripts/map_loader.py
@@ -120,6 +146,8 @@ install(TARGETS
   lookup_transform_service
   people_vis_node
   log_redirector_node
+  # grid_throttle_node
+  grid_image_throttle_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
