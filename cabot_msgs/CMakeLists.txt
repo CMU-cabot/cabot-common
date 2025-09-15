@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   msg/PoseLog.msg
   msg/PoseLog2.msg
   msg/Log.msg
+  msg/SignalState.msg
   msg/StopReason.msg
   srv/Speak.srv
   srv/LookupTransform.srv

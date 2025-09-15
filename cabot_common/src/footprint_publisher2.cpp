@@ -148,11 +148,36 @@ private:
   {
     auto offset_sign = this->get_parameter("offset_sign").get_value<double>();
     auto polygon = std::make_shared<geometry_msgs::msg::Polygon>();
-    for (size_t i = 0; i < footprint.size(); i += 2) {
+    double prev_x = 0;
+    double prev_y = 0;
+    for (size_t i = 0; i < footprint.size() / 2; i++) {
       geometry_msgs::msg::Point32 p;
-      p.x = footprint[i];
-      p.y = footprint[i + 1] * offset_sign;
+      p.x = footprint[i * 2];
+      p.y = footprint[i * 2 + 1] * offset_sign;
+      if (i == 2 || i == 4) {
+        // making arc from prev_x, prev_y to p.x, p.y with center 0,0
+        int num_points = 10;
+        double radius = sqrt(p.x * p.x + p.y * p.y);
+        double start_angle = atan2(prev_y, prev_x);
+        double end_angle = atan2(p.y, p.x);
+        if (offset_sign > 0 && end_angle < start_angle) {
+          end_angle += 2 * M_PI;
+        } else if (offset_sign < 0 && start_angle < end_angle) {
+          start_angle += 2 * M_PI;
+        }
+        for (int j = 1; j < num_points; j++) {
+          double angle = start_angle + (end_angle - start_angle) * j / num_points;
+          geometry_msgs::msg::Point32 q;
+          q.x = radius * cos(angle);
+          q.y = radius * sin(angle);
+          RCLCPP_DEBUG(this->get_logger(), "i: %d, j: %d, angle: %f (%f, %f) (%f, %f)", i, j, angle, start_angle, end_angle, q.x, q.y);
+          polygon->points.push_back(q);
+        }
+      }
+      RCLCPP_DEBUG(this->get_logger(), "i: %d, (%f, %f)", i, p.x, p.y);
       polygon->points.push_back(p);
+      prev_x = p.x;
+      prev_y = p.y;
     }
     return polygon;
   }
