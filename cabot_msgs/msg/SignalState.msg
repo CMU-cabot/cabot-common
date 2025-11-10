@@ -21,3 +21,7 @@
 std_msgs/Header header
 string state
 float64 remaining_time
+float64 distance
+float64 user_speed
+float64 expected_time
+float64 next_programmed_seconds
