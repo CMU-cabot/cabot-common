@@ -21,8 +21,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   msg/Log.msg
   msg/SignalState.msg
   msg/StopReason.msg
+  msg/SpeakRequest.msg
+  msg/SpeakStatus.msg
   srv/Speak.srv
   srv/LookupTransform.srv
+  action/Speak.action
   DEPENDENCIES geometry_msgs std_msgs tf2_msgs
 )
 
